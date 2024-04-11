@@ -13,7 +13,7 @@ from torch.utils.data import DataLoader, random_split
 import numpy as np
 import pdb
 
-class VqaDataset(Dataset):
+class VqaDataset(torch.utils.data.Dataset):
     def __init__(self, path, split='train',like_test=False,prefix_length=2):
         super().__init__()
         data_path = path+split+'.pkl'
@@ -27,7 +27,7 @@ class VqaDataset(Dataset):
         self.img_prefixes = data["img_prefix"]
         self.questions = data['questions']
         self.answers = data['answers']
-        self.img_paths = data['img_path']
+        self.img_paths = data['img_paths']
 
         self.max_seqs_len = data['max_seqs_len']
         self.labels = data['class_ids']       
