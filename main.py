@@ -49,9 +49,9 @@ if __name__ == "__main__":
     suffix = f"v5_prefixlength_{args.prefix_length}_seed_{args.seed}_gpttype_{args.model_type.replace('/','')}_setting_{args.setting}"
 
     args.out_dir = os.path.join('../checkpoints', suffix)
-    train_dataset = VqaDataset(args.dataset_path+'/',split="train",prefix_length=args.prefix_length,model_type=args.model_type,setting = args.setting)
-    val_dataset = VqaDataset(args.dataset_path+'/',split="val",prefix_length=args.prefix_length,model_type=args.model_type,setting = args.setting)
-    test_dataset = VqaDataset(args.dataset_path+'/',split="test",prefix_length=args.prefix_length,model_type=args.model_type,setting = args.setting,like_test=True)
+    train_dataset = VqaDataset(args.dataset_path+'/',split="train",prefix_length=args.prefix_length,model_type=args.model_type)
+    val_dataset = VqaDataset(args.dataset_path+'/',split="val",prefix_length=args.prefix_length,model_type=args.model_type)
+    test_dataset = VqaDataset(args.dataset_path+'/',split="test",prefix_length=args.prefix_length,model_type=args.model_type,like_test=True)
 
     model = VQAModel(
         prefix_length=args.prefix_length,
