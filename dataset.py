@@ -14,13 +14,14 @@ import numpy as np
 import pdb
 
 class VqaDataset(torch.utils.data.Dataset):
-    def __init__(self, path, split='train',like_test=False,prefix_length=2):
+    def __init__(self, path, split='train',like_test=False,prefix_length=2,model_type='gpt2-xl'):
         super().__init__()
         data_path = path+split+'.pkl'
         with open(data_path, 'rb') as f:
             data = pickle.load(f)
         sys.stdout.flush()
-        self.tokenizer = AutoTokenizer.from_pretrained('gpt2')
+        self.model_type = model_type
+        self.tokenizer = AutoTokenizer.from_pretrained(model_type)
         self.tokenizer.pad_token = self.tokenizer.eos_token
 
         self.img_ids = data["img_ids"]

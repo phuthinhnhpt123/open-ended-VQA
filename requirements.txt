@@ -5,3 +5,5 @@ torch==2.1.0
 torchsummary==1.5.1
 torchvision==0.16.0
 Pillow==10.0.1
+evaluate
+peft
