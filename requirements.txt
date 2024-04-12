@@ -7,3 +7,5 @@ torchvision==0.16.0
 Pillow==10.0.1
 evaluate
 peft
+accelerate
+bitsandbytes

@@ -14,7 +14,7 @@ import numpy as np
 import pdb
 
 class VqaDataset(torch.utils.data.Dataset):
-    def __init__(self, path, split='train',like_test=False,prefix_length=2,model_type='gpt2-xl'):
+    def __init__(self, path, split='train',like_test=False,prefix_length=2,model_type='gpt2'):
         super().__init__()
         data_path = path+split+'.pkl'
         with open(data_path, 'rb') as f:
