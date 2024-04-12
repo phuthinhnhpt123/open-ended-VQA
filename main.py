@@ -46,7 +46,7 @@ def parse_argument():
 
 if __name__ == "__main__":
     args = parse_argument()
-    suffix = f"v5_prefixlength_{args.prefix_length}_mapping_{args.mapping_type}_seed_{args.seed}_gpttype_{args.model_type.replace('/','')}_setting_{args.setting}_dataset_{args.dataset}"
+    suffix = f"v5_prefixlength_{args.prefix_length}_seed_{args.seed}_gpttype_{args.model_type.replace('/','')}_setting_{args.setting}"
 
     args.out_dir = os.path.join('../checkpoints', suffix)
     train_dataset = VqaDataset(args.dataset_path+'/',split="train",prefix_length=args.prefix_length,model_type=args.model_type,setting = args.setting)
