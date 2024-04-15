@@ -67,7 +67,6 @@ def pytorch_model_run(train_loader, valid_loader, model_obj, args):
                     mask = mask.type(torch.long)
                     q_len = q_len.type(torch.long)
                     print("\ni: ", i)
-                    print("\nmask shape: ", mask.shape)
                     outputs = model(prefix, labels, tokens, mask, q_len, batch_size=args.batch_size)
                     logits = outputs.logits
                     loss = 0.

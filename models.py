@@ -27,7 +27,9 @@ class VQAModel(nn.Module):
             embedding = self.gpt.transformer.wte(tokens)
         for b in range(batch_size):
             # insert the visual prefix after the question 
-            embedding[b,q_len[b]:q_len[b]+self.prefix_length,:] = prefix_projections[b]  
+            embedding[b,q_len[b]:q_len[b]+self.prefix_length,:] = prefix_projections[b]
+        print("\nembedding shape: ", embedding.shape)
+        print("\nmask shape: ", mask.shape)  
         return self.gpt(inputs_embeds=embedding, attention_mask=mask)
     def generate(self, prefix, labels, tokens, mask, q_len):
         prefix_projections = self.clip_project(prefix.view(1, -1)).view(self.prefix_length, self.gpt_embedding_size)
