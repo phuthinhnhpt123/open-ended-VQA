@@ -77,11 +77,11 @@ def update_classes(pkl_train, pkl_val, pkl_test):
     # standardize answer ids across datasets and compute the maximum number of generated output tokens based on the train set
     tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
     with open(pkl_train, 'rb') as f:
-            data_train = pickle.load(f)
+        data_train = pickle.load(f)
     with open(pkl_val, 'rb') as f:
-            data_val = pickle.load(f)
+        data_val = pickle.load(f)
     with open(pkl_test, 'rb') as f:
-            data_test = pickle.load(f)
+        data_test = pickle.load(f)
     
     cur_id = 0
     class_names_list = []

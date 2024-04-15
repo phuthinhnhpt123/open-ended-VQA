@@ -58,7 +58,10 @@ class VqaDataset(torch.utils.data.Dataset):
             a = torch.cat((a,m[3])) if len(pad_start)==0 else torch.cat((a[:pad_start],m[3],a[pad_start:]))
             q = torch.cat((m[0],q,m[1],torch.ones(self.prefix_len),m[2],a))
             
+            print("\nm shape: ", m.shape)
+            print("\nm_mask shape: ", m_mask.shape)
             q_mask = torch.cat((m_mask[0],q_mask,m_mask[1],torch.ones(self.prefix_len),m_mask[2],a_mask,m_mask[3]))
+            print("\nq_mask shape: ", q_mask.shape)
             return q,q_mask, q_len
         else:
             # in the test stage we do not have acces to the answer, so we just load the question. 
