@@ -39,8 +39,8 @@ class VqaDataset(torch.utils.data.Dataset):
         return len(self.answers)
     
     def pad_sequences(self,index):
-        m = [torch.tensor(self.tokenizer.encode('question: ')),torch.tensor(self.tokenizer.encode(' context:')),torch.tensor(self.tokenizer.encode('answer ')),torch.tensor(self.tokenizer.encode('<|endoftext|>'))]
-        m_mask = [torch.ones(len(self.tokenizer.encode('question: '))),torch.ones(len(self.tokenizer.encode(' context:'))),torch.ones(len(self.tokenizer.encode('answer '))),torch.zeros(self.tokenizer.encode('<|endoftext|>'))]   
+        m = [torch.tensor(self.tokenizer.encode('question: ')),torch.tensor(self.tokenizer.encode(' context: ')),torch.tensor(self.tokenizer.encode(' answer: ')),torch.tensor(self.tokenizer.encode('<|endoftext|>'))]
+        m_mask = [torch.ones(len(self.tokenizer.encode('question: '))),torch.ones(len(self.tokenizer.encode(' context: '))),torch.ones(len(self.tokenizer.encode(' answer: '))),torch.zeros(self.tokenizer.encode('<|endoftext|>'))]   
 
         if self.train_setting:
             # construct the model input. The order is question, image, answer. During training the answer is masked. Any padding is placed on the right of the sequence. 
@@ -58,11 +58,15 @@ class VqaDataset(torch.utils.data.Dataset):
             a = torch.cat((a,m[3])) if len(pad_start)==0 else torch.cat((a[:pad_start],m[3],a[pad_start:]))
             q = torch.cat((m[0],q,m[1],torch.ones(self.prefix_len),m[2],a))
             
-            print("\nm shape: ", len(m))
             print("\nm: ", m)
-            print("\nm_mask shape: ", len(m_mask))
             print("\nm_mask: ", m_mask)
+            print("\nq_mask bf shape: ", q_mask.shape)
+            print("\nm mask size: ", m_mask[0].size)
+            print("\nm size: ", m[0].size)
+            print("\n ans size: ", a_mask.shape)
+            print("\nm mask 3 size: ",m_mask[3].size)
             q_mask = torch.cat((m_mask[0],q_mask,m_mask[1],torch.ones(self.prefix_len),m_mask[2],a_mask,m_mask[3]))
+            
             print("\nq_mask shape: ", q_mask.shape)
             return q,q_mask, q_len
         else:
