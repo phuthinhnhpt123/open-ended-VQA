@@ -61,7 +61,7 @@ class VqaDataset(torch.utils.data.Dataset):
             print("\nm[2]: ", m[2])
             print("\nm[3]: ", m[3])
 
-            q = torch.cat((m[0],q,m[1],torch.ones(self.prefix_len),m[2],a,m[3]))
+            q = torch.cat((m[0],q,m[1],torch.ones(self.prefix_len),m[2],a))
             
             print("\nm: ", m)
             print("\nm_mask: ", m_mask)
