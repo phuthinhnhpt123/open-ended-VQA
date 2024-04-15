@@ -61,10 +61,10 @@ class VqaDataset(torch.utils.data.Dataset):
             print("\nm: ", m)
             print("\nm_mask: ", m_mask)
             print("\nq_mask bf shape: ", q_mask.shape)
-            print("\nm mask size: ", m_mask[0].size)
-            print("\nm size: ", m[0].size)
+            print("\nm mask size: ", m_mask[0].size(0))
+            print("\nm size: ", m[0].size(0))
             print("\n ans size: ", a_mask.shape)
-            print("\nm mask 3 size: ",m_mask[3].size)
+            print("\nm mask 3 size: ",m_mask[3].size(0))
             q_mask = torch.cat((m_mask[0],q_mask,m_mask[1],torch.ones(self.prefix_len),m_mask[2],a_mask,m_mask[3]))
             
             print("\nq_mask shape: ", q_mask.shape)
