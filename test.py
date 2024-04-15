@@ -46,7 +46,6 @@ def parse_argument():
 
 if __name__ == "__main__":
     args = parse_argument()
-    print("\nmodel type: ", args.model_type)
     suffix = f"v5_prefixlength_{args.prefix_length}_seed_{args.seed}_gpttype_{args.model_type.replace('/','')}_setting_{args.setting}"
 
     args.out_dir = os.path.join('../checkpoints', suffix)
