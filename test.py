@@ -19,7 +19,7 @@ def set_random_seeds(random_seed=0):
 
 def parse_argument():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_type", type=str, default="gpt2-xl")
+    parser.add_argument("--model_type", type=str, default="gpt2")
     parser.add_argument("--setting", type=str, default="lora", choices=("lora", "frozen"))
     parser.add_argument("--mapping_type", type=str, default="MLP")
     parser.add_argument("--prefix_length", type=int, default=8)
@@ -46,6 +46,7 @@ def parse_argument():
 
 if __name__ == "__main__":
     args = parse_argument()
+    print("\nmodel type: ", args.model_type)
     suffix = f"v5_prefixlength_{args.prefix_length}_seed_{args.seed}_gpttype_{args.model_type.replace('/','')}_setting_{args.setting}"
 
     args.out_dir = os.path.join('../checkpoints', suffix)
