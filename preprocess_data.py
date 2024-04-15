@@ -13,7 +13,7 @@ import argparse
 import string
 import random
 import numpy as np
-# from transformers import set_seed, GPT2Config, GPT2Tokenizer
+from transformers import set_seed, GPT2Config, GPT2Tokenizer
 from datasets import load_dataset, Dataset, DatasetDict
 
 def split_dataset(data_dir):
@@ -72,4 +72,52 @@ def preprocess_data(data_dir, data, split, out_path):
     with open(out_path, 'wb') as f:
         pickle.dump(image_dict,f)
     print('Done') 
+
+def update_classes(pkl_train, pkl_val, pkl_test):
+    # standardize answer ids across datasets and compute the maximum number of generated output tokens based on the train set
+    tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+    with open(pkl_train, 'rb') as f:
+            data_train = pickle.load(f)
+    with open(pkl_val, 'rb') as f:
+            data_val = pickle.load(f)
+    with open(pkl_test, 'rb') as f:
+            data_test = pickle.load(f)
+    
+    cur_id = 0
+    class_names_list = []
+    class_ids_list = [[],[],[]]
+
+    for i, data in enumerate([data_train,data_val,data_test]):
+        for answer in data['answers']:
+            if answer not in class_names_list:
+                class_names_list.append(answer)
+                class_ids_list[i].append(cur_id)
+                cur_id+=1
+            else:
+                class_ids_list[i].append(class_names_list.index(answer))
+    q_lens = []
+    a_lens = []
+    for question in data_train['questions']:
+        q_lens.append(len(tokenizer.encode(question)))
+    for answer in data_train['answers']:
+        a_lens.append(len(tokenizer.encode(str(answer))))
+    
+    data_train['class_ids'] = class_ids_list[0]
+    data_val['class_ids'] = class_ids_list[1]
+    data_test['class_ids'] = class_ids_list[2]
+    
+    data_train['class_names'] = class_names_list
+    data_val['class_names'] = class_names_list
+    data_test['class_names'] = class_names_list
+
+    data_train['max_seqs_len']=(int(np.mean(q_lens)+2*np.std(q_lens)),int(np.mean(a_lens)+2*np.std(a_lens)))
+    data_val['max_seqs_len']=(int(np.mean(q_lens)+2*np.std(q_lens)),int(np.mean(a_lens)+2*np.std(a_lens)))
+    data_test['max_seqs_len']=(int(np.mean(q_lens)+2*np.std(q_lens)),int(np.mean(a_lens)+2*np.std(a_lens)))
+    
+    with open(pkl_train, 'wb') as f:
+        pickle.dump(data_train,f)
+    with open(pkl_val, 'wb') as f:
+        pickle.dump(data_val,f)
+    with open(pkl_test, 'wb') as f:
+        pickle.dump(data_test,f)
 
