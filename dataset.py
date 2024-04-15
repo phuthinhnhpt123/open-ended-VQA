@@ -56,7 +56,7 @@ class VqaDataset(torch.utils.data.Dataset):
             else:
                 pad_start=[]
             a = torch.cat((a,m[3])) if len(pad_start)==0 else torch.cat((a[:pad_start],m[3],a[pad_start:]))
-            q = torch.cat((m[0],q,m[1],torch.ones(self.prefix_len),m[2],a))
+            q = torch.cat((m[0],q,m[1],torch.ones(self.prefix_len),m[2],a,m[3]))
             
             print("\nm: ", m)
             print("\nm_mask: ", m_mask)

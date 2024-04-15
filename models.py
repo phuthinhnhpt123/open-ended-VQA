@@ -20,10 +20,7 @@ from prefix_mappers import MLP, TransformerMapper
 
 class VQAModel(nn.Module):
     def forward(self, prefix, labels, tokens, mask, q_len, batch_size):
-        print("\ngpt embedding size: ", self.gpt_embedding_size)
         prefix_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.gpt_embedding_size)
-        print("\nprefix projections size: ", prefix_projections.shape)
-        print("\nprefix projections: ", prefix_projections)
         if self.gpttype=='microsoft/biogpt':
             embedding = self.gpt.transformer.embed_tokens(tokens)
         else:
