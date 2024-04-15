@@ -56,6 +56,11 @@ class VqaDataset(torch.utils.data.Dataset):
             else:
                 pad_start=[]
             a = torch.cat((a,m[3])) if len(pad_start)==0 else torch.cat((a[:pad_start],m[3],a[pad_start:]))
+            print("\nm[0]: ", m[0])
+            print("\nm[1]: ", m[1])
+            print("\nm[2]: ", m[2])
+            print("\nm[3]: ", m[3])
+
             q = torch.cat((m[0],q,m[1],torch.ones(self.prefix_len),m[2],a,m[3]))
             
             print("\nm: ", m)
