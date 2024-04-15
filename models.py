@@ -20,16 +20,17 @@ from prefix_mappers import MLP, TransformerMapper
 
 class VQAModel(nn.Module):
     def forward(self, prefix, labels, tokens, mask, q_len, batch_size):
+        print("\ngpt embedding size: ", self.gpt_embedding_size)
         prefix_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.gpt_embedding_size)
+        print("\nprefix projections size: ", prefix_projections.shape)
+        print("\nprefix projections: ", prefix_projections)
         if self.gpttype=='microsoft/biogpt':
             embedding = self.gpt.transformer.embed_tokens(tokens)
         else:
             embedding = self.gpt.transformer.wte(tokens)
         for b in range(batch_size):
             # insert the visual prefix after the question 
-            embedding[b,q_len[b]:q_len[b]+self.prefix_length,:] = prefix_projections[b]
-        print("\nembedding shape: ", embedding.shape)
-        print("\nmask shape: ", mask.shape)  
+            embedding[b,q_len[b]:q_len[b]+self.prefix_length,:] = prefix_projections[b]  
         return self.gpt(inputs_embeds=embedding, attention_mask=mask)
     def generate(self, prefix, labels, tokens, mask, q_len):
         prefix_projections = self.clip_project(prefix.view(1, -1)).view(self.prefix_length, self.gpt_embedding_size)
