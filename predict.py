@@ -40,6 +40,7 @@ def eval_gpt_open_ended(model, dataset, args, print_vis_token_meaning=True):
                     for i in range(prefix_projections.size(1)):
                       print_nearest_text_token(prefix_projections[0,i], model)
                   out_text = generate_beam(model, model.tokenizer,generated=embed,entry_length=dataset.max_seqs_len[1], temperature=1)[0]
+                  print('out text: ', out_text)
 
             if out_text.lower()==dataset.answers[item].lower(): 
               acc+=1
