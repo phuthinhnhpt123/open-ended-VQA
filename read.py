@@ -94,7 +94,6 @@ if __name__ == "__main__":
             prefix = prefix.type(torch.float32)
             tokens = tokens.type(torch.long)
             mask = mask.type(torch.long)
-            q_len = q_len.type(torch.long)
             with autocast(dtype=torch.float16):
                 with torch.no_grad():
                     embed = model.generate(prefix,labels,tokens,mask,q_len).view(1,tokens.size(0),-1)
