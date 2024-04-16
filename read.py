@@ -102,5 +102,6 @@ if __name__ == "__main__":
                         for i in range(prefix_projections.size(1)):
                           print_nearest_text_token(prefix_projections[0,i], model)
                     out_text = generate_beam(model, model.tokenizer,generated=embed,entry_length=test_dataset.max_seqs_len[1], temperature=1)[0]
+                    print(out_text)
 
    
