@@ -41,18 +41,18 @@ def eval_gpt_open_ended(model, dataset, args, print_vis_token_meaning=True):
                       print_nearest_text_token(prefix_projections[0,i], model)
                   out_text = generate_beam(model, model.tokenizer,generated=embed,entry_length=dataset.max_seqs_len[1], temperature=1)[0]
 
-            if out_text.lower()==dataset.answers_raw[item].lower(): 
+            if out_text.lower()==dataset.answers[item].lower(): 
               acc+=1
-            if dataset.answers_raw[item].lower()=='yes' or dataset.answers_raw[item].lower()=='no':
-              if out_text.lower()==dataset.answers_raw[item].lower():
+            if dataset.answers[item].lower()=='yes' or dataset.answers[item].lower()=='no':
+              if out_text.lower()==dataset.answers[item].lower():
                 acc_yn+=1
               c_yn+=1
             else:
-              if out_text.lower()==dataset.answers_raw[item].lower():
+              if out_text.lower()==dataset.answers[item].lower():
                 acc_oe+=1
               c_oe+=1
                 
-            reference = [str(dataset.answers_raw[item])]
+            reference = [str(dataset.answers[item])]
             candidate = [out_text]
 
             bleu_1 = sentence_bleu(reference[0], candidate[0], weights=(1, 0, 0, 0))
