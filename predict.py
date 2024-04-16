@@ -38,10 +38,10 @@ def eval_gpt_open_ended(model, dataset, args, print_vis_token_meaning=True):
             with autocast(dtype=torch.float16):
               with torch.no_grad():
                   embed = model.generate(prefix,labels,tokens,mask,q_len).view(1,tokens.size(0),-1)
-                  if print_vis_token_meaning:
-                    prefix_projections = embed[:,q_len:q_len+model.prefix_length,:]
-                    for i in range(prefix_projections.size(1)):
-                      print_nearest_text_token(prefix_projections[0,i], model)
+                  # if print_vis_token_meaning:
+                  #   prefix_projections = embed[:,q_len:q_len+model.prefix_length,:]
+                  #   for i in range(prefix_projections.size(1)):
+                  #     print_nearest_text_token(prefix_projections[0,i], model)
                   out_text = generate_beam(model, model.tokenizer,generated=embed,entry_length=dataset.max_seqs_len[1], temperature=1)[0]
                   print('out text: ', out_text)
 
