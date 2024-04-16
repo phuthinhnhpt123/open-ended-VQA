@@ -89,7 +89,7 @@ if __name__ == "__main__":
             raise ValueError("Please provide valid path for loading checkpoint")
         
         print_vis_token_meaning = True
-        for item in range(0,1):
+        for item in range(0,10):
             prefix,  labels, tokens, mask, q_len = test_dataset[item]
             prefix = prefix.type(torch.float32)
             tokens = tokens.type(torch.long)
