@@ -8,73 +8,62 @@ import argparse
 import numpy as np
 import random
 import os
+import pandas as pd
+from datasets import load_dataset, Dataset, DatasetDict
+from collections import defaultdict
 
-def set_random_seeds(random_seed=0):
+data_dir = "visual7w_data"
 
-    torch.manual_seed(random_seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-    np.random.seed(random_seed)
-    random.seed(random_seed)
+def split_dataset(data_dir):
+    data = load_dataset("json", data_files=os.path.join(data_dir,"annotations", "dataset_v7w_telling.json"), field="images", split="train")
 
-def parse_argument():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--model_type", type=str, default="gpt2")
-    parser.add_argument("--setting", type=str, default="lora", choices=("lora", "frozen"))
-    parser.add_argument("--mapping_type", type=str, default="MLP")
-    parser.add_argument("--prefix_length", type=int, default=8)
-    parser.add_argument(
-        "--dataset_path", type=str, default="../visual7w/"
-    )
-    parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--epochs", type=int, default=30)
-    parser.add_argument("--lr", type=float, default=1e-4)
-    parser.add_argument("--warmup_steps", type=int, default=600)
-    parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--iters_to_accumulate", type=int, default=4)
-    parser.add_argument("--validation_step", type=int, default=1000)
-    parser.add_argument("--out_dir", default="./checkpoints")
-    parser.add_argument("--checkpoint", type=str)
-    parser.add_argument("--eval", dest="eval", action="store_true")
+    train_dataset = data.filter(lambda x: x['split'] == 'train')
+    test_dataset = data.filter(lambda x: x['split'] == 'test')
+    val_dataset = data.filter(lambda x: x['split'] == 'val')
 
-    parser.add_argument("--verbose", dest="verbose", action="store_true")
+    dataset = DatasetDict({
+    'train': train_dataset,
+    'test': test_dataset,
+    'val': val_dataset
+    })
 
-    args = parser.parse_args()
+    return dataset
+
+data = split_dataset(data_dir)
+
+def stats_question_type(data, split):
     
-    set_random_seeds(args.seed)
-    return args
+    questions = []
+    answers = []
+    types = []
+    sub_data = data[split]
+    for i in range(len(sub_data)):
+        qa_pairs = data[split][i]['qa_pairs']
+        for j in range(len(qa_pairs)):
+            questions.append(qa_pairs[j]['question'])
+            answers.append(qa_pairs[j]['answer'])
+            types.append(qa_pairs[j]['type'])
+    
+    question_type_dict = {"questions": questions, "answers": answers, "types": types}
 
-if __name__ == "__main__":
-    args = parse_argument()
-    suffix = f"v5_prefixlength_{args.prefix_length}_seed_{args.seed}_gpttype_{args.model_type.replace('/','')}_setting_{args.setting}"
+    return question_type_dict
 
-    args.out_dir = os.path.join('../checkpoints', suffix)
-    train_dataset = VqaDataset(args.dataset_path+'/',split="train",prefix_length=args.prefix_length,model_type=args.model_type)
-    val_dataset = VqaDataset(args.dataset_path+'/',split="val",prefix_length=args.prefix_length,model_type=args.model_type)
-    test_dataset = VqaDataset(args.dataset_path+'/',split="test",prefix_length=args.prefix_length,model_type=args.model_type,like_test=True)
 
-    model = VQAModel(
-        prefix_length=args.prefix_length,
-        clip_length=4,
-        setting=args.setting,
-        mapping_type=args.mapping_type,
-        args=args,
-    )
+a = stats_question_type(data,'train')
+df = pd.DataFrame(a)
+type_counts = df['types'].value_counts()
+print(type_counts)
 
-    train_dataloader = DataLoader(dataset=train_dataset, batch_size=args.batch_size, shuffle=True, drop_last=True)
-    val_dataloader = DataLoader(dataset=val_dataset, batch_size=args.batch_size, shuffle=False, drop_last=True)
-    test_dataloader = DataLoader(dataset=test_dataset, batch_size=args.batch_size, shuffle=False, drop_last=True)
+# df_why = df[df['types'] == 'why']
+# print(df_why.head(10))
 
-    if not args.eval:
-        model = pytorch_model_run(train_dataloader, val_dataloader, model, args)
-    else:
-        checkpoint = os.path.join(args.out_dir, f"open_ended_latest.pt")
-        if args.verbose:
-            print(f">> Loading pre-trained model {checkpoint}!")
-        if os.path.exists(checkpoint):
-            model.load_state_dict(
-                torch.load(checkpoint, map_location=torch.device("cpu")), strict=False
-            )
-        else:
-            raise ValueError("Please provide valid path for loading checkpoint")
-        eval_gpt_open_ended(model, test_dataset,args)
+df_who = df[df['types'] == 'who']
+df_why = df[df['types'] == 'why']
+df_when = df[df['types'] == 'when']
+
+sample_who = df_who.sample(n=100).reset_index(drop=True)
+sample_why = df_why.sample(n=100).reset_index(drop=True)
+sample_when = df_when.sample(n=100).reset_index(drop=True)
+
+sample = pd.concat([sample_who,sample_why,sample_when])
+print(sample)

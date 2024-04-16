@@ -56,17 +56,11 @@ def generate_beam(
                 generated = generated[next_tokens_source]
                 scores = scores_sum_average * seq_lengths
                 is_stopped = is_stopped[next_tokens_source]
-            if model.model_type == "biogpt":
-                next_token_embed = model.gpt.biogpt.embed_tokens(
-                    next_tokens.squeeze()
-                ).view(generated.shape[0], 1, -1)
-            elif model.model_type == "gpt2":
-                next_token_embed = model.gpt.transformer.wte(
-                    next_tokens.squeeze()
-                ).view(generated.shape[0], 1, -1)
-            else:
-                next_token_embed = model.gpt.get_input_embeddings()(tokens[:,-1])
-                next_token_embed=next_token_embed.squeeze().view(generated.shape[0], 1, -1)
+
+            next_token_embed = model.gpt.transformer.wte(
+                next_tokens.squeeze()
+            ).view(generated.shape[0], 1, -1)
+
             generated = torch.cat((generated, next_token_embed), dim=1)
             is_stopped = is_stopped + next_tokens.eq(stop_token_index).squeeze()
             if is_stopped.all():
