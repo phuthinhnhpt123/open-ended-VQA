@@ -68,7 +68,7 @@ def generate_beam(
     scores = scores / seq_lengths
     output_list = tokens.cpu().numpy()
     output_texts = [
-        tokenizer.decode(output[: int(length)])
+        tokenizer.decode(output[: int(length-1)])
         for output, length in zip(output_list, seq_lengths)
     ]
     order = scores.argsort(descending=True)
