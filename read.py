@@ -91,9 +91,10 @@ if __name__ == "__main__":
         print_vis_token_meaning = True
         for item in range(0,1):
             prefix,  labels, tokens, mask, q_len = test_dataset[item]
-            prefix = prefix.type(torch.float32).cuda()
-            tokens = tokens.type(torch.long).cuda()
-            mask = mask.cuda()
+            prefix = prefix.type(torch.float32)
+            tokens = tokens.type(torch.long)
+            mask = mask.type(torch.long)
+            q_len = q_len.type(torch.long)
             with autocast(dtype=torch.float16):
                 with torch.no_grad():
                     embed = model.generate(prefix,labels,tokens,mask,q_len).view(1,tokens.size(0),-1)
