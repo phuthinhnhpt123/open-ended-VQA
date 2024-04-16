@@ -29,9 +29,9 @@ def eval_gpt_open_ended(model, dataset, args, print_vis_token_meaning=True):
         epoch_pbar.set_description("Testing")
         for item in range(len(dataset)):
             prefix,  labels, tokens, mask, q_len = dataset[item]
-            prefix = prefix.type(torch.float32)
-            tokens = tokens.type(torch.long)
-            mask = mask.type(torch.long)
+            prefix = prefix.type(torch.float32).cuda()
+            tokens = tokens.type(torch.long).cuda()
+            mask = mask.cuda()
             with autocast(dtype=torch.float16):
               with torch.no_grad():
                   embed = model.generate(prefix,labels,tokens,mask,q_len).view(1,tokens.size(0),-1)
