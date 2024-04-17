@@ -16,6 +16,36 @@ import numpy as np
 from transformers import set_seed, GPT2Config, GPT2Tokenizer
 from datasets import load_dataset, Dataset, DatasetDict
 
+def get_question_types(dataset):
+    question_types = {}
+    for item in dataset:
+        for qa in item['qa_pairs']:
+            q_type = qa['type']
+            if q_type not in question_types:
+                question_types[q_type] = set()
+            question_types[q_type].add(item['image_id'])
+    return {key: list(values) for key, values in question_types.items()}
+
+def stratified_sample(dataset, question_types, ratio=1/3):
+    subset_ids = set()
+    # Tính số lượng mẫu cần lấy cho mỗi loại câu hỏi
+    for q_type, ids in question_types.items():
+        num_samples = int(len(ids) * ratio)
+        chosen_ids = np.random.choice(ids, num_samples, replace=False)
+        subset_ids.update(chosen_ids)
+
+    # Lọc dataset để lấy các mục có image_id trong subset_ids
+    filtered_data = [item for item in dataset if item['image_id'] in subset_ids]
+    return filtered_data
+
+def reformat_data(filtered_data):
+    # Khởi tạo một dictionary với keys là các fields và values là empty lists
+    reformatted_data = {key: [] for key in filtered_data[0].keys()}
+    for item in filtered_data:
+        for key in item:
+            reformatted_data[key].append(item[key])
+    return reformatted_data
+
 def split_dataset(data_dir):
     data = load_dataset("json", data_files=os.path.join(data_dir,"annotations", "dataset_v7w_telling.json"), field="images", split="train")
 
@@ -29,8 +59,32 @@ def split_dataset(data_dir):
     'val': val_dataset
     })
 
-    # print(dataset['train'][0])
-    return dataset
+    question_types_train = get_question_types(dataset['train'])
+    train_filtered = stratified_sample(dataset['train'], question_types_train)
+
+    question_types_test = get_question_types(data['test'])
+    test_filtered = stratified_sample(dataset['test'], question_types_test)
+
+    question_types_val = get_question_types(data['val'])
+    val_filtered = stratified_sample(dataset['val'], question_types_val)
+
+    train_data_dict = reformat_data(train_filtered)
+    test_data_dict = reformat_data(test_filtered)
+    val_data_dict = reformat_data(val_filtered)
+
+    # Tạo các Dataset từ dữ liệu đã lọc
+    train_dataset = Dataset.from_dict(train_data_dict)
+    test_dataset = Dataset.from_dict(test_data_dict)
+    val_dataset = Dataset.from_dict(val_data_dict)
+
+    # Tạo DatasetDict mới
+    new_dataset = DatasetDict({
+        'train': train_dataset,
+        'test': test_dataset,
+        'val': val_dataset
+    })
+
+    return new_dataset
 
 def preprocess_data(data_dir, data, split, out_path):
     device = torch.device('cuda:0')
@@ -62,8 +116,8 @@ def preprocess_data(data_dir, data, split, out_path):
     for idx, imgs in enumerate(img_dict.keys()):
         all_img_prefixes.append(img_dict[imgs][2])
         for q in range(len(img_dict[imgs][0])):
-            all_questions.append(img_dict[imgs][0][q])
-            all_answers.append(img_dict[imgs][1][q])
+            all_questions.append(img_dict[imgs][0][q].lower())
+            all_answers.append(img_dict[imgs][1][q].strip(".").lower())
             img_idxs.append(idx)
             img_paths.append(img_dict[imgs][3])
     
@@ -75,7 +129,7 @@ def preprocess_data(data_dir, data, split, out_path):
 
 def update_classes(pkl_train, pkl_val, pkl_test):
     # standardize answer ids across datasets and compute the maximum number of generated output tokens based on the train set
-    tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+    tokenizer = GPT2Tokenizer.from_pretrained('gpt2-xl')
     with open(pkl_train, 'rb') as f:
         data_train = pickle.load(f)
     with open(pkl_val, 'rb') as f:
