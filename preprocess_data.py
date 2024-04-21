@@ -27,21 +27,22 @@ def get_question_types(dataset):
             question_types[q_type].add(qa_id)
     return {key: list(values) for key, values in question_types.items()}
 
-def stratified_sample(dataset, question_types, ratio=1/3):
+def stratified_sample(dataset, question_types, ratio=1/6):
     subset_ids = set()
-    # Tính số lượng mẫu cần lấy cho mỗi loại câu hỏi
     for q_type, ids in question_types.items():
         num_samples = int(len(ids) * ratio)
         chosen_ids = np.random.choice(ids, num_samples, replace=False)
         subset_ids.update(chosen_ids)
 
+    new_items = []
     for item in dataset:
         filtered_qa_pairs = [qa for qa in item['qa_pairs'] if qa['qa_id'] in subset_ids]
+        if filtered_qa_pairs:
+            new_item = item.copy()
+            new_item['qa_pairs'] = filtered_qa_pairs
+            new_items.append(new_item)
 
-        # item['qa_pairs'] = filtered_qa_pairs
-    # Lọc dataset để lấy các mục có image_id trong subset_ids
-    # filtered_data = [item for item in dataset if item['image_id'] in subset_ids]
-    # return filtered_data
+    return new_items
 
 def reformat_data(filtered_data):
     # Khởi tạo một dictionary với keys là các fields và values là empty lists
