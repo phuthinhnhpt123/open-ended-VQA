@@ -157,19 +157,16 @@ def update_classes(pkl_train, pkl_val, pkl_test):
             else:
                 class_ids_list[i].append(class_names_list.index(answer))
 
-    for i, data in enumerate([data_train,data_val,data_test]):
+    for _, data in enumerate([data_train,data_val,data_test]):
 
         q_lens = []
         a_lens = []
 
         for question in data['questions']:
             q_lens.append(len(tokenizer.encode(question)))
-        if (i!=2):
-            for answer in data['answers']:
-                a_lens.append(len(tokenizer.encode(str(answer))))
-            data['max_seqs_len']=(int(np.mean(q_lens)+2*np.std(q_lens)),int(np.mean(a_lens)+2*np.std(a_lens)))
-        else:
-            data['max_seqs_len']=(int(np.mean(q_lens)+2*np.std(q_lens)),0)
+        for answer in data['answers']:
+            a_lens.append(len(tokenizer.encode(str(answer))))
+        data['max_seqs_len']=(int(np.mean(q_lens)+2*np.std(q_lens)),int(np.mean(a_lens)+2*np.std(a_lens)))
           
     data_train['class_ids'] = class_ids_list[0]
     data_val['class_ids'] = class_ids_list[1]
