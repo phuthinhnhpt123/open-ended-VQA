@@ -56,11 +56,11 @@ class VqaDataset(torch.utils.data.Dataset):
             else:
                 pad_start=[]
             a = torch.cat((a,m[3])) if len(pad_start)==0 else torch.cat((a[:pad_start],m[3],a[pad_start:]))
-            q = torch.cat((m[0],q,m[1],torch.ones(self.prefix_len),m[2],a))
+            sentence_tokens = torch.cat((m[0],q,m[1],torch.ones(self.prefix_len),m[2],a))
             
-            q_mask = torch.cat((m_mask[0],q_mask,m_mask[1],torch.ones(self.prefix_len),m_mask[2],a_mask,m_mask[3]))
+            sentence_mask = torch.cat((m_mask[0],q_mask,m_mask[1],torch.ones(self.prefix_len),m_mask[2],a_mask,m_mask[3]))
             
-            return q,q_mask, q_len
+            return sentence_tokens,sentence_mask, q_len
         else:
             # in the test stage we do not have acces to the answer, so we just load the question. 
             # since inference is not performed batch-wised we don't need to apply padding
@@ -68,11 +68,10 @@ class VqaDataset(torch.utils.data.Dataset):
             
             q,q_mask,_ = self.make_padding_test_setting(self.max_seqs_len[0],q)
             q_len = m[0].size(0) + q.size(0) + m[1].size(0)
-            q = torch.cat((m[0],q,m[1],torch.ones(self.prefix_len),m[2]))
+            sentence_tokens = torch.cat((m[0],q,m[1],torch.ones(self.prefix_len),m[2]))
             
-            
-            q_mask = torch.cat((m_mask[0],q_mask,m_mask[1]))
-            return q,q_mask,q_len
+            sentence_mask = torch.cat((m_mask[0],q_mask,m_mask[1]))
+            return sentence_tokens,sentence_mask,q_len
         
     def make_padding(self, max_len, tokens, question=False,leftover_tokens=0):
         padding = max_len - tokens.size(0) 
@@ -90,8 +89,7 @@ class VqaDataset(torch.utils.data.Dataset):
             else:
                 mask = torch.zeros(tokens.size(0)+leftover_tokens)
                 tokens = torch.cat((tokens,torch.zeros(leftover_tokens)))
-                
-        
+                  
         elif padding < 0:
             if question:
                 tokens = tokens[:max_len]

@@ -67,10 +67,10 @@ def split_dataset(data_dir):
     question_types_train = get_question_types(dataset['train'])
     train_filtered = stratified_sample(dataset['train'], question_types_train)
 
-    question_types_test = get_question_types(data['test'])
+    question_types_test = get_question_types(dataset['test'])
     test_filtered = stratified_sample(dataset['test'], question_types_test)
 
-    question_types_val = get_question_types(data['val'])
+    question_types_val = get_question_types(dataset['val'])
     val_filtered = stratified_sample(dataset['val'], question_types_val)
 
     train_data_dict = reformat_data(train_filtered)
