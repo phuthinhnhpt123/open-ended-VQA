@@ -9,7 +9,6 @@ import pickle
 import json
 import os
 from tqdm import tqdm
-import argparse
 import string
 import random
 import numpy as np
@@ -93,7 +92,9 @@ def split_dataset(data_dir):
     return new_dataset
 
 def preprocess_data(data_dir, data, split, out_path):
-    device = torch.device('cuda:0')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Using device {device}")
+
     clip_model, preprocess = clip.load("ViT-B/32", device=device, jit=False)
 
     all_img_prefixes = []
@@ -135,7 +136,7 @@ def preprocess_data(data_dir, data, split, out_path):
 
 def update_classes(pkl_train, pkl_val, pkl_test):
     # standardize answer ids across datasets and compute the maximum number of generated output tokens based on the train set
-    tokenizer = GPT2Tokenizer.from_pretrained('gpt2-xl')
+    tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
     with open(pkl_train, 'rb') as f:
         data_train = pickle.load(f)
     with open(pkl_val, 'rb') as f:
@@ -155,24 +156,24 @@ def update_classes(pkl_train, pkl_val, pkl_test):
                 cur_id+=1
             else:
                 class_ids_list[i].append(class_names_list.index(answer))
-    q_lens = []
-    a_lens = []
-    for question in data_train['questions']:
-        q_lens.append(len(tokenizer.encode(question)))
-    for answer in data_train['answers']:
-        a_lens.append(len(tokenizer.encode(str(answer))))
-    
+
+    for i, data in enumerate([data_train,data_val,data_test]):
+
+        q_lens = []
+        a_lens = []
+
+        for question in data['questions']:
+            q_lens.append(len(tokenizer.encode(question)))
+        if (i!=2):
+            for answer in data['answers']:
+                a_lens.append(len(tokenizer.encode(str(answer))))
+            data['max_seqs_len']=(int(np.mean(q_lens)+2*np.std(q_lens)),int(np.mean(a_lens)+2*np.std(a_lens)))
+        else:
+            data['max_seqs_len']=(int(np.mean(q_lens)+2*np.std(q_lens)),0)
+          
     data_train['class_ids'] = class_ids_list[0]
     data_val['class_ids'] = class_ids_list[1]
     data_test['class_ids'] = class_ids_list[2]
-    
-    data_train['class_names'] = class_names_list
-    data_val['class_names'] = class_names_list
-    data_test['class_names'] = class_names_list
-
-    data_train['max_seqs_len']=(int(np.mean(q_lens)+2*np.std(q_lens)),int(np.mean(a_lens)+2*np.std(a_lens)))
-    data_val['max_seqs_len']=(int(np.mean(q_lens)+2*np.std(q_lens)),int(np.mean(a_lens)+2*np.std(a_lens)))
-    data_test['max_seqs_len']=(int(np.mean(q_lens)+2*np.std(q_lens)),int(np.mean(a_lens)+2*np.std(a_lens)))
     
     with open(pkl_train, 'wb') as f:
         pickle.dump(data_train,f)

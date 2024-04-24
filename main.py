@@ -19,7 +19,7 @@ def set_random_seeds(random_seed=0):
 
 def parse_argument():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_type", type=str, default="gpt2-xl")
+    parser.add_argument("--model_type", type=str, default="gpt2")
     parser.add_argument("--setting", type=str, default="lora", choices=("lora", "frozen"))
     parser.add_argument("--mapping_type", type=str, default="MLP")
     parser.add_argument("--prefix_length", type=int, default=8)

@@ -16,7 +16,6 @@ from transformers import (
     AdamW,
     get_linear_schedule_with_warmup,
 )
-from torch.nn import functional as nnf
 from accelerate import Accelerator
 import pdb
 
@@ -57,8 +56,6 @@ def pytorch_model_run(train_loader, valid_loader, model_obj, args):
             start_time = time.time()
             model.train()
             total_loss = 0.0
-            total_acc = 0.0
-            total_rocauc = 0.0
 
             for i, (prefix, labels, tokens, mask, q_len) in enumerate(train_loader):
                 with accelerator.accumulate(model):
@@ -85,16 +82,12 @@ def pytorch_model_run(train_loader, valid_loader, model_obj, args):
                     optimizer.zero_grad()
                     total_loss += loss.item()
                     avg_loss = total_loss / (i+1)
-                    avg_acc = total_acc / (i + 1)
-                    avg_roc = total_rocauc / (i + 1)
-                    desc = f"Epoch {epoch} - loss {avg_loss:.20f} -accuracy {avg_acc:.4f} -auc {avg_roc:.4f}"
+                    desc = f"Epoch {epoch} - loss {avg_loss:.20f}"
                     epoch_pbar.set_description(desc)
                     epoch_pbar.update(prefix.shape[0])
         model.eval()
 
         total_loss = 0.0
-        total_acc = 0.0
-        # total_rocauc = 0.0
         with tqdm(total=args.batch_size * len(valid_loader)) as epoch_pbar:
             epoch_pbar.set_description(f"VAL Epoch {epoch}")
             for i, (prefix, labels, tokens, mask,q_len) in enumerate(valid_loader):
@@ -116,9 +109,7 @@ def pytorch_model_run(train_loader, valid_loader, model_obj, args):
                     loss=loss/logits.size(0)    
                     total_loss += loss.item()
                 avg_val_loss = total_loss / (i + 1)
-                avg_acc = total_acc / (i + 1)
-                avg_roc = total_rocauc / (i + 1)
-                desc = f"VAL Epoch {epoch} - loss {avg_val_loss:.20f} -acc {avg_acc:.4f} -roc {avg_roc:.4f}"
+                desc = f"VAL Epoch {epoch} - loss {avg_val_loss:.20f}"
                 epoch_pbar.set_description(desc)
                 epoch_pbar.update(prefix.shape[0])
 

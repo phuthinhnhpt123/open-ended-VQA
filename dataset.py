@@ -121,4 +121,4 @@ class VqaDataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         prefix = self.img_prefixes[self.img_ids[index]]
         tokens, mask, q_len  = self.pad_sequences(index)
-        return prefix,  self.labels[index], tokens, mask, q_len
+        return prefix, self.labels[index], tokens, mask, q_len

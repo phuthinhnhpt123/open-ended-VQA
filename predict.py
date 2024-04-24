@@ -14,17 +14,14 @@ def eval_gpt_open_ended(model, dataset, args, print_vis_token_meaning=True):
     model.eval()
     # model=model.cuda()
     bert_score = load("bertscore")
-    tokenizer = GPT2Tokenizer.from_pretrained('gpt2-xl')
+    tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
     bleu_avg1=0.
     bert_avg1 = 0.
     bert_avg2 = 0.
     bert_avg3 = 0.
     f1_avg = 0. 
     acc = 0.
-    acc_oe = 0.
-    acc_yn = 0.
-    c_oe =1e-9
-    c_yn =1e-9 
+
     with tqdm(total=len(dataset)) as epoch_pbar:
         epoch_pbar.set_description("Testing")
         for item in range(len(dataset)):
@@ -47,14 +44,6 @@ def eval_gpt_open_ended(model, dataset, args, print_vis_token_meaning=True):
 
             if out_text.lower()==dataset.answers[item].lower(): 
               acc+=1
-            if dataset.answers[item].lower()=='yes' or dataset.answers[item].lower()=='no':
-              if out_text.lower()==dataset.answers[item].lower():
-                acc_yn+=1
-              c_yn+=1
-            else:
-              if out_text.lower()==dataset.answers[item].lower():
-                acc_oe+=1
-              c_oe+=1
                 
             reference = [str(dataset.answers[item])]
             candidate = [out_text]
@@ -66,7 +55,6 @@ def eval_gpt_open_ended(model, dataset, args, print_vis_token_meaning=True):
             bert_avg2+= a['recall'][0]
             bert_avg3+= a['f1'][0]
 
-            
             f1_avg += compute_f1(tokenizer.encode(reference[0]),tokenizer.encode(candidate[0]))
             bleu_avg1+=bleu_1
 
@@ -76,8 +64,6 @@ def eval_gpt_open_ended(model, dataset, args, print_vis_token_meaning=True):
     print("BERTScore {}".format(round(bert_avg3/len(dataset),3)))
     print("F1 {}".format(round(f1_avg/len(dataset),3)))
     print("Accuracy {}".format(round(acc/len(dataset),3)))
-    print("Accuracy YN{}".format(round(acc_yn/c_yn,3)))
-    print("Accuracy OE{}".format(round(acc_oe/c_oe,3)))
 
 def print_nearest_text_token(vis_token, model):
     """print the nearest token in the vocabulary to the given token through model.gpt.embeddings.weight"""
