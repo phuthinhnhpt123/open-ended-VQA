@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 
 visual7w_data
+sample.csv

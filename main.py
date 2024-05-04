@@ -31,8 +31,6 @@ def parse_argument():
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--warmup_steps", type=int, default=600)
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--iters_to_accumulate", type=int, default=4)
-    parser.add_argument("--validation_step", type=int, default=1000)
     parser.add_argument("--out_dir", default="./checkpoints")
     parser.add_argument("--checkpoint", type=str)
     parser.add_argument("--eval", dest="eval", action="store_true")
@@ -77,4 +75,4 @@ if __name__ == "__main__":
             )
         else:
             raise ValueError("Please provide valid path for loading checkpoint")
-        eval_gpt_open_ended(model, test_dataset,args)
+        eval_gpt_open_ended(model,test_dataset,args)

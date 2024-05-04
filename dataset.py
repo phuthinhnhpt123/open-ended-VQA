@@ -2,14 +2,11 @@ from tqdm import tqdm
 import sys
 import torch
 import torch.nn as nn
-from transformers import set_seed, GPT2Config, GPT2Tokenizer
 from transformers import AutoTokenizer
-from transformers.models.biogpt import BioGptTokenizer
 import os
 import pandas as pd
-from torch.utils.data import Dataset
+
 import pickle
-from torch.utils.data import DataLoader, random_split
 import numpy as np
 import pdb
 
@@ -40,7 +37,7 @@ class VqaDataset(torch.utils.data.Dataset):
     
     def pad_sequences(self,index):
         m = [torch.tensor(self.tokenizer.encode('question: ')),torch.tensor(self.tokenizer.encode(' context: ')),torch.tensor(self.tokenizer.encode(' answer: ')),torch.tensor(self.tokenizer.encode('<|endoftext|>'))]
-        m_mask = [torch.ones(len(self.tokenizer.encode('question: '))),torch.ones(len(self.tokenizer.encode(' context: '))),torch.ones(len(self.tokenizer.encode(' answer: '))),torch.zeros(len(self.tokenizer.encode('<|endoftext|>')))]   
+        m_mask = [torch.ones(len(self.tokenizer.encode('question: '))),torch.ones(len(self.tokenizer.encode(' context: '))),torch.ones(len(self.tokenizer.encode(' answer: '))),torch.zeros(len(self.tokenizer.encode('<|endoftext|>')))]
 
         if self.train_setting:
             # construct the model input. The order is question, image, answer. During training the answer is masked. Any padding is placed on the right of the sequence. 

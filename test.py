@@ -59,15 +59,15 @@ def stats_question_type(data, split):
     return pd.DataFrame(question_type_dict)
 
 def sample_dataset(df):
-    df_who = df[df['types'] == 'who']
+    df_what = df[df['types'] == 'what']
     df_why = df[df['types'] == 'why']
-    df_when = df[df['types'] == 'when']
+    # df_when = df[df['types'] == 'when']
 
-    sample_who = df_who.sample(n=100)
+    sample_what = df_what.sample(n=100)
     sample_why = df_why.sample(n=100)
-    sample_when = df_when.sample(n=100)
+    # sample_when = df_when.sample(n=100)
 
-    sample = pd.concat([sample_who,sample_why,sample_when]).reset_index(drop=True)
+    sample = pd.concat([sample_what,sample_why]).reset_index(drop=True)
 
     sentences={"q_a":[]}
     for i in range(len(sample)):
@@ -81,20 +81,8 @@ def sample_dataset(df):
 
 
 data = split_dataset(data_dir)
-# df = stats_question_type(data,'train')
-# type_counts = df['types'].value_counts()
-# print(type_counts)
-
-# sample_dataset(df)
-
-
-# train_data = read_pickle(data_dir,'train')
-# test_data = read_pickle(data_dir,'test')
-# val_data = read_pickle(data_dir,'val')
-
-# print("num train data: ", len(train_data['questions']))
-# print("num test data: ", len(test_data['questions']))
-# print("num val data: ", len(val_data['questions']))
+df = stats_question_type(data,'train')
+sample_dataset(df)
 
 def get_question_types(dataset):
     question_types = {}
@@ -132,40 +120,39 @@ def reformat_data(filtered_data):
             reformatted_data[key].append(item[key])
     return reformatted_data
 
-print("num train bf: ", count_questions(data['train']))
-print("num test bf: ", count_questions(data['test']))
-print("num val bf: ", count_questions(data['val']))
+# question_types_train = get_question_types(data['train'])
+# train_filtered = stratified_sample(data['train'], question_types_train)
 
-question_types_train = get_question_types(data['train'])
-train_filtered = stratified_sample(data['train'], question_types_train)
+# question_types_test = get_question_types(data['test'])
+# test_filtered = stratified_sample(data['test'], question_types_test)
 
-question_types_test = get_question_types(data['test'])
-test_filtered = stratified_sample(data['test'], question_types_test)
+# question_types_val = get_question_types(data['val'])
+# val_filtered = stratified_sample(data['val'], question_types_val)
 
-question_types_val = get_question_types(data['val'])
-val_filtered = stratified_sample(data['val'], question_types_val)
+# train_data_dict = reformat_data(train_filtered)
+# test_data_dict = reformat_data(test_filtered)
+# val_data_dict = reformat_data(val_filtered)
 
-train_data_dict = reformat_data(train_filtered)
-test_data_dict = reformat_data(test_filtered)
-val_data_dict = reformat_data(val_filtered)
+# # # Tạo các Dataset từ dữ liệu đã lọc
+# train_dataset = Dataset.from_dict(train_data_dict)
+# test_dataset = Dataset.from_dict(test_data_dict)
+# val_dataset = Dataset.from_dict(val_data_dict)
 
-# # Tạo các Dataset từ dữ liệu đã lọc
-train_dataset = Dataset.from_dict(train_data_dict)
-test_dataset = Dataset.from_dict(test_data_dict)
-val_dataset = Dataset.from_dict(val_data_dict)
+# dataset_path = 'visual7w_data'
 
-print("num train af: ", count_questions(train_dataset))
-print("num test af: ", count_questions(test_dataset))
-print("num val af: ", count_questions(val_dataset))
-# Tạo DatasetDict mới
-# new_dataset = DatasetDict({
-#     'train': train_dataset,
-#     'test': test_dataset,
-#     'val': val_dataset
-# })
+# train_dataset = VqaDataset(dataset_path+'/',split="train",model_type='gpt2')
+# test_dataset = VqaDataset(dataset_path+'/',split="test",model_type='gpt2')
 
-# print(new_dataset)
+# train_dataloader = DataLoader(dataset=train_dataset, batch_size=32, shuffle=True, drop_last=True)
 
+# for item in range(10):
+#     prefix, labels, tokens, mask, q_len = train_dataset[item]
 
+#     print(f"tokens size: {tokens.size()}")
+#     print(f"\nmask: {mask}")
+#     print(f"\nq_len: {q_len}")
 
+# dataset = {'questions': test_dataset.questions, 'answers': test_dataset.answers}
+# df = pd.DataFrame(dataset)
+# print(df.head(10))
 

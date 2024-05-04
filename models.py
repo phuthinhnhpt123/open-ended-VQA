@@ -3,20 +3,17 @@ from tqdm import tqdm
 import sys
 import os
 import pdb
-from typing import Tuple, Optional, Union
 
-from peft import LoraConfig, get_peft_model,get_peft_config,PeftModelForCausalLM,TaskType 
+from peft import LoraConfig, get_peft_model,TaskType 
 
 import torch
 import torch.nn as nn
-from torch.nn import functional as nnf
 
 import transformers
-from transformers import set_seed, GPT2Config, GPT2Tokenizer, GPT2LMHeadModel
-from transformers.models.biogpt import BioGptForCausalLM, BioGptTokenizer, BioGptConfig
-from transformers import AutoTokenizer,AutoModelForCausalLM,AutoConfig
+from transformers import GPT2Tokenizer
+from transformers import AutoModelForCausalLM
 
-from prefix_mappers import MLP, TransformerMapper
+from prefix_mappers import MLP
 
 class VQAModel(nn.Module):
     def forward(self, prefix, labels, tokens, mask, q_len, batch_size):
@@ -64,12 +61,5 @@ class VQAModel(nn.Module):
                     (self.gpt_embedding_size * prefix_length) // 2,
                     self.gpt_embedding_size * prefix_length,
                     self.gpt_embedding_size * prefix_length))
-        elif mapping_type == "Transformer":
-            self.clip_project = TransformerMapper(
-                prefix_size,
-                self.gpt_embedding_size,
-                prefix_length,
-                clip_length,
-                num_layers)
         else:
             raise ValueError("select valid mapping type: MLP or Transformer")

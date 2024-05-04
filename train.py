@@ -1,4 +1,3 @@
-from sklearn.metrics import accuracy_score, roc_auc_score
 import torch
 from tqdm import tqdm
 import copy
@@ -8,10 +7,9 @@ import time
 import random
 import torch.nn as nn
 import torch.nn.functional as nnf
-import os
-import numpy as np
-import random
+
 import pandas as pd
+
 from transformers import (
     AdamW,
     get_linear_schedule_with_warmup,
@@ -32,7 +30,6 @@ def pytorch_model_run(train_loader, valid_loader, model_obj, args):
 
     optimizer = AdamW(model.parameters(), lr=args.lr)
 
-
     scheduler = get_linear_schedule_with_warmup(
         optimizer,
         num_warmup_steps=args.warmup_steps,
@@ -45,7 +42,6 @@ def pytorch_model_run(train_loader, valid_loader, model_obj, args):
     )
     valid_loader = accelerator.prepare(valid_loader)
 
-    
     best_valid_loss = float("inf")
     counter = 0
     n_epochs = args.epochs
