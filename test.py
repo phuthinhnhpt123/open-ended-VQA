@@ -80,9 +80,9 @@ def sample_dataset(df):
     print("Saved csv file")
 
 
-data = split_dataset(data_dir)
-df = stats_question_type(data,'train')
-sample_dataset(df)
+# data = split_dataset(data_dir)
+# df = stats_question_type(data,'train')
+# sample_dataset(df)
 
 def get_question_types(dataset):
     question_types = {}
@@ -120,24 +120,6 @@ def reformat_data(filtered_data):
             reformatted_data[key].append(item[key])
     return reformatted_data
 
-# question_types_train = get_question_types(data['train'])
-# train_filtered = stratified_sample(data['train'], question_types_train)
-
-# question_types_test = get_question_types(data['test'])
-# test_filtered = stratified_sample(data['test'], question_types_test)
-
-# question_types_val = get_question_types(data['val'])
-# val_filtered = stratified_sample(data['val'], question_types_val)
-
-# train_data_dict = reformat_data(train_filtered)
-# test_data_dict = reformat_data(test_filtered)
-# val_data_dict = reformat_data(val_filtered)
-
-# # # Tạo các Dataset từ dữ liệu đã lọc
-# train_dataset = Dataset.from_dict(train_data_dict)
-# test_dataset = Dataset.from_dict(test_data_dict)
-# val_dataset = Dataset.from_dict(val_data_dict)
-
 # dataset_path = 'visual7w_data'
 
 # train_dataset = VqaDataset(dataset_path+'/',split="train",model_type='gpt2')
@@ -155,4 +137,25 @@ def reformat_data(filtered_data):
 # dataset = {'questions': test_dataset.questions, 'answers': test_dataset.answers}
 # df = pd.DataFrame(dataset)
 # print(df.head(10))
+
+import pickle 
+
+dataset_path = "visual7w_data"
+with open(dataset_path + '/train.pkl', 'rb') as f:
+    train_data = pickle.load(f)
+with open(dataset_path + '/test.pkl', 'rb') as f:
+    test_data = pickle.load(f)
+with open(dataset_path + '/val.pkl', 'rb') as f:
+    val_data = pickle.load(f)
+
+print(train_data.keys())
+
+df = pd.DataFrame({
+    'img_ids': train_data['img_ids'],
+    'questions': train_data['questions'],
+    'answers': train_data['answers'],
+    'img_paths': train_data['img_paths'],
+    'class_ids': train_data['class_ids']
+})
+df.to_csv('train.csv',index=False)
 

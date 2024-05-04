@@ -3,16 +3,12 @@ import skimage.io as io
 import skimage.transform as transform
 import torchvision
 import clip
-import pandas as pd
 from PIL import Image
 import pickle
-import json
 import os
 from tqdm import tqdm
-import string
-import random
 import numpy as np
-from transformers import set_seed, GPT2Config, GPT2Tokenizer
+from transformers import AutoTokenizer
 from datasets import load_dataset, Dataset, DatasetDict
 
 def get_question_types(dataset):
@@ -28,7 +24,7 @@ def get_question_types(dataset):
 
 def stratified_sample(dataset, question_types, ratio=1/6):
     subset_ids = set()
-    for q_type, ids in question_types.items():
+    for _, ids in question_types.items():
         num_samples = int(len(ids) * ratio)
         chosen_ids = np.random.choice(ids, num_samples, replace=False)
         subset_ids.update(chosen_ids)
@@ -102,6 +98,7 @@ def preprocess_data(data_dir, data, split, out_path):
     img_paths = []
     all_questions = []
     all_answers = []
+    all_types = []
     img_dict = {}
 
     for i in tqdm(range(len(data[split]))):
@@ -115,10 +112,11 @@ def preprocess_data(data_dir, data, split, out_path):
 
         for j in range(len(qa_pairs)):
             if img_id not in img_dict.keys():
-                img_dict[img_id] = [[qa_pairs[j]['question']],[qa_pairs[j]['answer']],prefix_i,filename]
+                img_dict[img_id] = [[qa_pairs[j]['question']],[qa_pairs[j]['answer']],prefix_i,filename,[qa_pairs[j]['type']]]
             else:
                 img_dict[img_id][0].append(qa_pairs[j]['question'])
                 img_dict[img_id][1].append(qa_pairs[j]['answer'])
+                img_dict[img_id][4].append(qa_pairs[j]['type'])
     
     for idx, imgs in enumerate(img_dict.keys()):
         all_img_prefixes.append(img_dict[imgs][2])
@@ -127,8 +125,9 @@ def preprocess_data(data_dir, data, split, out_path):
             all_answers.append(img_dict[imgs][1][q].strip(".").lower())
             img_idxs.append(idx)
             img_paths.append(img_dict[imgs][3])
+            all_types.append(img_dict[imgs][4])
     
-    image_dict = {"img_prefix": torch.cat(all_img_prefixes, dim=0), "img_ids": img_idxs, "questions": all_questions, "answers": all_answers, "img_paths": img_paths}
+    image_dict = {"img_prefix": torch.cat(all_img_prefixes, dim=0), "img_ids": img_idxs, "questions": all_questions, "answers": all_answers, "img_paths": img_paths, "types":all_types}
 
     with open(out_path, 'wb') as f:
         pickle.dump(image_dict,f)
@@ -136,7 +135,7 @@ def preprocess_data(data_dir, data, split, out_path):
 
 def update_classes(pkl_train, pkl_val, pkl_test):
     # standardize answer ids across datasets and compute the maximum number of generated output tokens based on the train set
-    tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+    tokenizer = AutoTokenizer.from_pretrained('gpt2')
     with open(pkl_train, 'rb') as f:
         data_train = pickle.load(f)
     with open(pkl_val, 'rb') as f:
@@ -166,7 +165,7 @@ def update_classes(pkl_train, pkl_val, pkl_test):
             q_lens.append(len(tokenizer.encode(question)))
         for answer in data['answers']:
             a_lens.append(len(tokenizer.encode(str(answer))))
-        data['max_seqs_len']=(int(np.mean(q_lens)+2*np.std(q_lens)),int(np.mean(a_lens)+2*np.std(a_lens)))
+        data['max_seqs_len']=(int(np.mean(q_lens)+3*np.std(q_lens)),int(np.mean(a_lens)+3*np.std(a_lens)))
           
     data_train['class_ids'] = class_ids_list[0]
     data_val['class_ids'] = class_ids_list[1]
