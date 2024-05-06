@@ -4,7 +4,6 @@ from predict import eval_gpt_open_ended
 from models import VQAModel
 from dataset import VqaDataset
 from torch.utils.data import DataLoader
-import argparse
 import numpy as np
 import random
 import os
@@ -42,22 +41,6 @@ def read_pickle(data_dir,split):
         data = pickle.load(f)
     return data
 
-def stats_question_type(data, split):
-    questions = []
-    answers = []
-    types = []
-    sub_data = data[split]
-    for i in range(len(sub_data)):
-        qa_pairs = data[split][i]['qa_pairs']
-        for j in range(len(qa_pairs)):
-            questions.append(qa_pairs[j]['question'])
-            answers.append(qa_pairs[j]['answer'])
-            types.append(qa_pairs[j]['type'])
-    
-    question_type_dict = {"questions": questions, "answers": answers, "types": types}
-
-    return pd.DataFrame(question_type_dict)
-
 def sample_dataset(df):
     df_what = df[df['types'] == 'what']
     df_why = df[df['types'] == 'why']
@@ -78,11 +61,6 @@ def sample_dataset(df):
 
     d.to_csv("sample.csv",index=False)
     print("Saved csv file")
-
-
-# data = split_dataset(data_dir)
-# df = stats_question_type(data,'train')
-# sample_dataset(df)
 
 def get_question_types(dataset):
     question_types = {}
@@ -120,42 +98,27 @@ def reformat_data(filtered_data):
             reformatted_data[key].append(item[key])
     return reformatted_data
 
-# dataset_path = 'visual7w_data'
+# import pickle 
 
-# train_dataset = VqaDataset(dataset_path+'/',split="train",model_type='gpt2')
-# test_dataset = VqaDataset(dataset_path+'/',split="test",model_type='gpt2')
+# dataset_path = "visual7w_data"
+# with open(dataset_path + '/train.pkl', 'rb') as f:
+#     train_data = pickle.load(f)
+# with open(dataset_path + '/test.pkl', 'rb') as f:
+#     test_data = pickle.load(f)
+# with open(dataset_path + '/val.pkl', 'rb') as f:
+#     val_data = pickle.load(f)
 
-# train_dataloader = DataLoader(dataset=train_dataset, batch_size=32, shuffle=True, drop_last=True)
+# train_df = pd.read_csv('visual7w_data/train.csv')
+# test_df = pd.read_csv('visual7w_data/test.csv')
+# val_df = pd.read_csv('visual7w_data/val.csv')
 
-# for item in range(10):
-#     prefix, labels, tokens, mask, q_len = train_dataset[item]
+# grouped_train = train_df.groupby('types').size().reset_index(name='count')
+# grouped_test = test_df.groupby('types').size().reset_index(name='count')
+# grouped_val = val_df.groupby('types').size().reset_index(name='count')
 
-#     print(f"tokens size: {tokens.size()}")
-#     print(f"\nmask: {mask}")
-#     print(f"\nq_len: {q_len}")
+# print(grouped_train)
+# print(grouped_test)
+# print(grouped_val)
 
-# dataset = {'questions': test_dataset.questions, 'answers': test_dataset.answers}
-# df = pd.DataFrame(dataset)
-# print(df.head(10))
 
-import pickle 
-
-dataset_path = "visual7w_data"
-with open(dataset_path + '/train.pkl', 'rb') as f:
-    train_data = pickle.load(f)
-with open(dataset_path + '/test.pkl', 'rb') as f:
-    test_data = pickle.load(f)
-with open(dataset_path + '/val.pkl', 'rb') as f:
-    val_data = pickle.load(f)
-
-print(train_data.keys())
-
-df = pd.DataFrame({
-    'img_ids': train_data['img_ids'],
-    'questions': train_data['questions'],
-    'answers': train_data['answers'],
-    'img_paths': train_data['img_paths'],
-    'class_ids': train_data['class_ids']
-})
-df.to_csv('train.csv',index=False)
 

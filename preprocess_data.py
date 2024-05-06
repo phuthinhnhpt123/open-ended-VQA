@@ -112,7 +112,7 @@ def preprocess_data(data_dir, data, split, out_path):
 
         for j in range(len(qa_pairs)):
             if img_id not in img_dict.keys():
-                img_dict[img_id] = [[qa_pairs[j]['question']],[qa_pairs[j]['answer']],prefix_i,filename,[qa_pairs[j]['type']]]
+                img_dict[img_id] = [[qa_pairs[j]['question']],[qa_pairs[j]['answer']],prefix_i,img_path,[qa_pairs[j]['type']]]
             else:
                 img_dict[img_id][0].append(qa_pairs[j]['question'])
                 img_dict[img_id][1].append(qa_pairs[j]['answer'])
@@ -125,7 +125,7 @@ def preprocess_data(data_dir, data, split, out_path):
             all_answers.append(img_dict[imgs][1][q].strip(".").lower())
             img_idxs.append(idx)
             img_paths.append(img_dict[imgs][3])
-            all_types.append(img_dict[imgs][4])
+            all_types.append(img_dict[imgs][4][q])
     
     image_dict = {"img_prefix": torch.cat(all_img_prefixes, dim=0), "img_ids": img_idxs, "questions": all_questions, "answers": all_answers, "img_paths": img_paths, "types":all_types}
 
