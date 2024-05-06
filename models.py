@@ -59,7 +59,6 @@ class VQAModel(nn.Module):
             self.clip_project = MLP((
                     prefix_size,
                     (self.gpt_embedding_size * prefix_length) // 2,
-                    self.gpt_embedding_size * prefix_length,
                     self.gpt_embedding_size * prefix_length))
         else:
             raise ValueError("select valid mapping type: MLP or Transformer")

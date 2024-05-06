@@ -1,5 +1,7 @@
 from tqdm import tqdm
 import torch
+import json
+import pandas as pd
 from utils import generate_beam
 from nltk.translate.bleu_score import sentence_bleu
 import pdb
@@ -18,6 +20,10 @@ def eval_gpt_open_ended(model, dataset, args):
     bert_avg3 = 0.
     acc = 0.
 
+    generated_answers = []
+
+    metrics = {"bleu":0.0, "Bertscore":0.0, "accuracy":0.0}
+
     with tqdm(total=len(dataset)) as epoch_pbar:
         epoch_pbar.set_description("Testing")
         for item in range(len(dataset)):
@@ -32,6 +38,7 @@ def eval_gpt_open_ended(model, dataset, args):
                   embed = model.generate(prefix,labels,tokens,mask,q_len).view(1,tokens.size(0),-1)
 
                   out_text = generate_beam(model, model.tokenizer,generated=embed,entry_length=dataset.max_seqs_len[1], temperature=1)[0]
+                  generated_answers.append(out_text)
                   print('out text: ', out_text)
 
             if out_text.lower()==dataset.answers[item].lower(): 
@@ -51,4 +58,17 @@ def eval_gpt_open_ended(model, dataset, args):
     print('------------')
     print("BLEU {}".format(round(bleu_avg1/len(dataset),3)))
     print("BERTScore {}".format(round(bert_avg3/len(dataset),3)))
-    print("Accuracy {}".format(round(acc/len(dataset),3))) 
+    print("Accuracy {}".format(round(acc/len(dataset),3)))
+  	
+    metrics['bleu'] = round(bleu_avg1/len(dataset),3)
+    metrics['Bertscore'] = round(bert_avg3/len(dataset),3)
+    metrics['accuracy'] = round(acc/len(dataset),3)
+
+    with open('metrics.json', 'w') as f:
+      json.dump(metrics,f,indent=4)
+
+    compare_answer = {"predict": generated_answers,"answers": dataset['answers']}
+    df = pd.DataFrame(data=compare_answer)
+    df.to_csv('compare_answers.csv',index=False)
+    
+    # return generated_answers
