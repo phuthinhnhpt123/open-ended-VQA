@@ -11,6 +11,9 @@ import pandas as pd
 import pickle
 from datasets import load_dataset, Dataset, DatasetDict
 from collections import defaultdict
+from nltk.translate.bleu_score import sentence_bleu
+from nltk.translate.bleu_score import SmoothingFunction
+from evaluate import load
 
 data_dir = "visual7w_data"
 
@@ -119,6 +122,25 @@ def reformat_data(filtered_data):
 # print(grouped_train)
 # print(grouped_test)
 # print(grouped_val)
+
+df = pd.read_csv('visual7w_data/compare_answers.csv')
+bleu_avg1=0.
+bert_avg=0.
+bert_score = load("bertscore")
+
+for i in range(len(df['answers'])):
+    reference = df['answers'][i]
+    candidate = df['predict'][i]
+
+    bert_avg+=bert_score.compute(references=[reference],predictions=[candidate],model_type = 'bert-base-uncased')['f1'][0]
+    
+    # chencherry = SmoothingFunction()
+    # bleu_avg1+=sentence_bleu([reference.split()], candidate.split(), weights=(1,0,0,0), smoothing_function=chencherry.method7)
+
+# print(round(bleu_avg1/len(df['answers']),3))
+print(round(bert_avg/len(df['answers']),3))
+
+
 
 
 

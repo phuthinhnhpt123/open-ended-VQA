@@ -4,6 +4,7 @@ import json
 import pandas as pd
 from utils import generate_beam
 from nltk.translate.bleu_score import sentence_bleu
+from nltk.translate.bleu_score import SmoothingFunction
 import pdb
 from evaluate import load
 from torch.cuda.amp import autocast
@@ -14,10 +15,9 @@ def eval_gpt_open_ended(model, dataset, args):
 
     bert_score = load("bertscore")
 
-    bleu_avg1=0.
-    bert_avg1 = 0.
-    bert_avg2 = 0.
-    bert_avg3 = 0.
+    bleu_avg=0.
+    bert_avg = 0.
+
     acc = 0.
 
     generated_answers = []
@@ -44,24 +44,23 @@ def eval_gpt_open_ended(model, dataset, args):
             if out_text.lower()==dataset.answers[item].lower(): 
               acc+=1
                 
-            reference = [str(dataset.answers[item])]
-            candidate = [out_text]
+            reference = str(dataset.answers[item])
+            candidate = out_text.split()
 
-            bleu_1 = sentence_bleu(reference[0], candidate[0], weights=(1, 0, 0, 0))
-            bleu_avg1+=bleu_1
+            chencherry = SmoothingFunction()
+            bleu_1 = sentence_bleu([reference.split()], candidate.split(), weights=(1, 0, 0, 0), smoothing_function=chencherry.method7)
+            bleu_avg+=bleu_1
 
-            a = bert_score.compute(references = reference,predictions = candidate,model_type = 'bert-base-uncased')
-            bert_avg1+= a['precision'][0]
-            bert_avg2+= a['recall'][0]
-            bert_avg3+= a['f1'][0]
+            a = bert_score.compute(references =[reference],predictions =[candidate],model_type = 'bert-base-uncased')
+            bert_avg+= a['f1'][0]
 
     print('------------')
-    print("BLEU {}".format(round(bleu_avg1/len(dataset),3)))
-    print("BERTScore {}".format(round(bert_avg3/len(dataset),3)))
+    print("BLEU {}".format(round(bleu_avg/len(dataset),3)))
+    print("BERTScore {}".format(round(bert_avg/len(dataset),3)))
     print("Accuracy {}".format(round(acc/len(dataset),3)))
   	
-    metrics['bleu'] = round(bleu_avg1/len(dataset),3)
-    metrics['Bertscore'] = round(bert_avg3/len(dataset),3)
+    metrics['bleu'] = round(bleu_avg/len(dataset),3)
+    metrics['Bertscore'] = round(bert_avg/len(dataset),3)
     metrics['accuracy'] = round(acc/len(dataset),3)
 
     with open('metrics.json', 'w') as f:
