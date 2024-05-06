@@ -67,8 +67,8 @@ def eval_gpt_open_ended(model, dataset, args):
     with open('metrics.json', 'w') as f:
       json.dump(metrics,f,indent=4)
 
-    compare_answer = {"predict": generated_answers,"answers": dataset['answers']}
+    compare_answer = {"predict": generated_answers,"answers": dataset.answers}
     df = pd.DataFrame(data=compare_answer)
     df.to_csv('compare_answers.csv',index=False)
-    
+
     # return generated_answers
