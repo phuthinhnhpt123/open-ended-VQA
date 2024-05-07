@@ -125,10 +125,11 @@ def reformat_data(filtered_data):
 # print(grouped_test)
 # print(grouped_val)
 
-def preprocess_augment_data(data_dir, augment_data_dir):
+def preprocess_augment_data(data_dir, augment_data_dir, out_path):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device {device}")
 
+    tokenizer = AutoTokenizer.from_pretrained('gpt2')
     clip_model, preprocess = clip.load("ViT-B/32", device=device, jit=False)
 
     with open(data_dir+'/train.pkl','rb') as f:
@@ -145,9 +146,13 @@ def preprocess_augment_data(data_dir, augment_data_dir):
     all_types = data_train['types']
     img_prefixes = []
 
+    cur_id = int(max(data_train['class_ids'])) + 1
+    class_names_list = data_train['answers']
+    class_ids_list = data_train['class_ids']
+
     for i in range(len(df_augment['questions'])):
         img_id = df_augment['image_id'][i]
-        img_path = os.path.join(data_dir,'images_use',img_id)
+        img_path = os.path.join(data_dir,'images_augment',img_id)
         question = str(df_augment['questions'][i]).lower()
         answer = str(df_augment['answers'][i]).strip(".").lower()
         question_type = df_augment['types'][i]
@@ -159,7 +164,7 @@ def preprocess_augment_data(data_dir, augment_data_dir):
         else:
             img_dict[img_id][0].append(question)
             img_dict[img_id][1].append(answer)
-            img_dict[img_id][3].append(question_type)
+            img_dict[img_id][4].append(question_type)
 
     last_idx = int(data_train['img_ids'][-1]) + 1
     for idx, imgs in enumerate(img_dict.keys()):
@@ -168,14 +173,38 @@ def preprocess_augment_data(data_dir, augment_data_dir):
             all_questions.append(img_dict[imgs][0][q])
             all_answers.append(img_dict[imgs][1][q])
             img_idxs.append(idx+last_idx)
-            img_paths.append(img_dict[imgs][3])
-            all_types.append(img_dict[imgs][4][q])
+            img_paths.append(img_dict[imgs][2])
+            all_types.append(img_dict[imgs][3][q])
     
-    addition_img_prefixes = torch.tensor(img_prefixes)
-    image_dict = {"img_prefix": torch.cat((all_img_prefixes,addition_img_prefixes), dim=0), "img_ids": img_idxs, "questions": all_questions, "answers": all_answers, "img_paths": img_paths, "types":all_types}
+    addition_img_prefixes = torch.cat(img_prefixes,dim=0)
 
-    df = pd.DataFrame.from_dict(data=image_dict)
+    for answer in df_augment['answers']:
+        answer = answer.strip(".").lower()
+        if answer not in class_names_list:
+            class_names_list.append(answer)
+            class_ids_list.append(cur_id)
+            cur_id+=1
+        else:
+            class_ids_list.append(class_names_list.index(answer))
+
+    q_lens = []
+    a_lens = []
+
+    for question in all_answers:
+        q_lens.append(len(tokenizer.encode(question)))
+    for answer in all_answers:
+        a_lens.append(len(tokenizer.encode(str(answer))))
+
+    max_seq_len=(int(np.mean(q_lens)+3*np.std(q_lens)),int(np.mean(a_lens)+3*np.std(a_lens)))
+
+    image_dict = {"img_prefix": torch.cat((all_img_prefixes,addition_img_prefixes), dim=0),"img_ids": img_idxs, "questions": all_questions, "answers": all_answers, "img_paths": img_paths, "types":all_types, 'max_seq_len':max_seq_len, 'class_ids':class_ids_list}
+
+    df = pd.DataFrame.from_dict(image_dict)
     df.to_csv('test.csv',index=False)
+
+    with open(out_path, 'wb') as f:
+        pickle.dump(image_dict,f)
+    print('Done')
 
 preprocess_augment_data('visual7w_data','visual7w_data/augment.csv')
 
