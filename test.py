@@ -1,6 +1,8 @@
 from train import pytorch_model_run
 import torch
 from predict import eval_gpt_open_ended
+# import clip
+from PIL import Image
 from models import VQAModel
 from dataset import VqaDataset
 from torch.utils.data import DataLoader
@@ -123,24 +125,58 @@ def reformat_data(filtered_data):
 # print(grouped_test)
 # print(grouped_val)
 
-df = pd.read_csv('visual7w_data/compare_answers.csv')
-bleu_avg1=0.
-bert_avg=0.
-bert_score = load("bertscore")
+def preprocess_augment_data(data_dir, augment_data_dir):
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Using device {device}")
 
-for i in range(len(df['answers'])):
-    reference = df['answers'][i]
-    candidate = df['predict'][i]
+    clip_model, preprocess = clip.load("ViT-B/32", device=device, jit=False)
 
-    bert_avg+=bert_score.compute(references=[reference],predictions=[candidate],model_type = 'bert-base-uncased')['f1'][0]
+    with open(data_dir+'/train.pkl','rb') as f:
+        data_train = pickle.load(f)
     
-    # chencherry = SmoothingFunction()
-    # bleu_avg1+=sentence_bleu([reference.split()], candidate.split(), weights=(1,0,0,0), smoothing_function=chencherry.method7)
+    df_augment = pd.read_csv(augment_data_dir)
 
-# print(round(bleu_avg1/len(df['answers']),3))
-print(round(bert_avg/len(df['answers']),3))
+    img_dict = {}
+    all_img_prefixes=data_train['img_prefix']
+    all_questions = data_train['questions']
+    all_answers = data_train['answers']
+    img_idxs = data_train['img_ids']
+    img_paths = data_train['img_paths']
+    all_types = data_train['types']
+    img_prefixes = []
 
+    for i in range(len(df_augment['questions'])):
+        img_id = df_augment['image_id'][i]
+        img_path = os.path.join(data_dir,'images_use',img_id)
+        question = str(df_augment['questions'][i]).lower()
+        answer = str(df_augment['answers'][i]).strip(".").lower()
+        question_type = df_augment['types'][i]
 
+        if img_id not in img_dict.keys():
+            with torch.no_grad():
+                prefix_i = clip_model.encode_image(preprocess(Image.open(img_path)).unsqueeze(0).to(device)).cpu()
+            img_dict[img_id] = [[question],[answer],prefix_i,img_id,[question_type]]
+        else:
+            img_dict[img_id][0].append(question)
+            img_dict[img_id][1].append(answer)
+            img_dict[img_id][3].append(question_type)
 
+    last_idx = int(data_train['img_ids'][-1]) + 1
+    for idx, imgs in enumerate(img_dict.keys()):
+        img_prefixes.append(img_dict[imgs][2])
+        for q in range(len(img_dict[imgs][0])):
+            all_questions.append(img_dict[imgs][0][q])
+            all_answers.append(img_dict[imgs][1][q])
+            img_idxs.append(idx+last_idx)
+            img_paths.append(img_dict[imgs][3])
+            all_types.append(img_dict[imgs][4][q])
+    
+    addition_img_prefixes = torch.tensor(img_prefixes)
+    image_dict = {"img_prefix": torch.cat((all_img_prefixes,addition_img_prefixes), dim=0), "img_ids": img_idxs, "questions": all_questions, "answers": all_answers, "img_paths": img_paths, "types":all_types}
+
+    df = pd.DataFrame.from_dict(data=image_dict)
+    df.to_csv('test.csv',index=False)
+
+preprocess_augment_data('visual7w_data','visual7w_data/augment.csv')
 
 
