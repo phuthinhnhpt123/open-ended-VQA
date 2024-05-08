@@ -47,8 +47,8 @@ def eval_gpt_open_ended(model, dataset, args):
             reference = str(dataset.answers[item])
             candidate = out_text
 
-            chencherry = SmoothingFunction()
-            bleu_1 = sentence_bleu([reference.split()], candidate.split(), weights=(1, 0, 0, 0), smoothing_function=chencherry.method7)
+            # chencherry = SmoothingFunction()
+            bleu_1 = sentence_bleu([reference.split()], candidate.split(), weights=(1, 0, 0, 0))
             bleu_avg+=bleu_1
 
             a = bert_score.compute(references =[reference],predictions =[candidate],model_type = 'bert-base-uncased')
