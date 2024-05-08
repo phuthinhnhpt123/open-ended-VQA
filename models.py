@@ -16,7 +16,7 @@ from transformers import AutoModelForCausalLM
 from prefix_mappers import MLP
 
 class VQAModel(nn.Module):
-    def forward(self, prefix, labels, tokens, mask, q_len, batch_size):
+    def forward(self, prefix, tokens, mask, q_len, batch_size):
         prefix_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.gpt_embedding_size)
 
         embedding = self.gpt.transformer.wte(tokens)
@@ -25,7 +25,7 @@ class VQAModel(nn.Module):
             # insert the visual prefix after the question 
             embedding[b,q_len[b]:q_len[b]+self.prefix_length,:] = prefix_projections[b]  
         return self.gpt(inputs_embeds=embedding, attention_mask=mask)
-    def generate(self, prefix, labels, tokens, mask, q_len):
+    def generate(self, prefix, tokens, mask, q_len):
         prefix_projections = self.clip_project(prefix.view(1, -1)).view(self.prefix_length, self.gpt_embedding_size)
 
         embedding_txt = self.gpt.transformer.wte(tokens)

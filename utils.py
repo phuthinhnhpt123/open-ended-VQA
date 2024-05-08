@@ -20,7 +20,7 @@ def generate_beam(
     seq_lengths = torch.ones(beam_size, device=device)
     is_stopped = torch.zeros(beam_size, device=device, dtype=torch.bool)
     with torch.no_grad():
-        for i in range(entry_length):
+        for _ in range(entry_length):
             outputs = model.gpt(inputs_embeds=generated)
             logits = outputs.logits
 

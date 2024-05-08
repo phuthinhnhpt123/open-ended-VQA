@@ -53,13 +53,13 @@ def pytorch_model_run(train_loader, valid_loader, model_obj, args):
             model.train()
             total_loss = 0.0
 
-            for i, (prefix, labels, tokens, mask, q_len) in enumerate(train_loader):
+            for i, (prefix, tokens, mask, q_len) in enumerate(train_loader):
                 with accelerator.accumulate(model):
                     prefix = prefix.type(torch.float32)
                     tokens = tokens.type(torch.long)
                     mask = mask.type(torch.long)
                     q_len = q_len.type(torch.long)
-                    outputs = model(prefix, labels, tokens, mask, q_len, batch_size=args.batch_size)
+                    outputs = model(prefix, tokens, mask, q_len, batch_size=args.batch_size)
                     logits = outputs.logits
                     loss = 0.
 
@@ -86,7 +86,7 @@ def pytorch_model_run(train_loader, valid_loader, model_obj, args):
         total_loss = 0.0
         with tqdm(total=args.batch_size * len(valid_loader)) as epoch_pbar:
             epoch_pbar.set_description(f"VAL Epoch {epoch}")
-            for i, (prefix, labels, tokens, mask,q_len) in enumerate(valid_loader):
+            for i, (prefix, tokens, mask,q_len) in enumerate(valid_loader):
                 torch.cuda.empty_cache()
                 prefix = prefix.type(torch.float32)
                 tokens = tokens.type(torch.long)
@@ -94,7 +94,7 @@ def pytorch_model_run(train_loader, valid_loader, model_obj, args):
                 q_len = q_len.type(torch.long)
 
                 with torch.no_grad():
-                    outputs = model(prefix, labels, tokens, mask, q_len, batch_size=args.batch_size)
+                    outputs = model(prefix, tokens, mask, q_len, batch_size=args.batch_size)
                     logits = outputs.logits
                     loss = 0.
                     shift = 10 if args.setting=="p_tuning" or args.setting=="prompttuning" else 0 

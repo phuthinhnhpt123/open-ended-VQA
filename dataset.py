@@ -28,7 +28,7 @@ class VqaDataset(torch.utils.data.Dataset):
         self.img_paths = data['img_paths']
 
         self.max_seqs_len = data['max_seqs_len']
-        self.labels = data['class_ids']       
+        # self.labels = data['class_ids']       
         self.train_setting = True if (split!='test'and like_test==False) else False
         self.prefix_len = prefix_length
 
@@ -116,4 +116,4 @@ class VqaDataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         prefix = self.img_prefixes[self.img_ids[index]]
         tokens, mask, q_len  = self.pad_sequences(index)
-        return prefix, self.labels[index], tokens, mask, q_len
+        return prefix, tokens, mask, q_len
