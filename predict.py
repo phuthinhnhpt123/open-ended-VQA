@@ -27,7 +27,7 @@ def eval_gpt_open_ended(model, dataset, args):
     with tqdm(total=len(dataset)) as epoch_pbar:
         epoch_pbar.set_description("Testing")
         for item in range(len(dataset)):
-            prefix, labels, tokens, mask, q_len = dataset[item]
+            prefix, tokens, mask, q_len = dataset[item]
 
             prefix = prefix.type(torch.float32)
             tokens = tokens.type(torch.long)
@@ -35,7 +35,7 @@ def eval_gpt_open_ended(model, dataset, args):
 
             with autocast(dtype=torch.float16):
               with torch.no_grad():
-                  embed = model.generate(prefix,labels,tokens,mask,q_len).view(1,tokens.size(0),-1)
+                  embed = model.generate(prefix,tokens,mask,q_len).view(1,tokens.size(0),-1)
 
                   out_text = generate_beam(model, model.tokenizer,generated=embed,entry_length=dataset.max_seqs_len[1], temperature=1)[0]
                   generated_answers.append(out_text)
@@ -45,7 +45,7 @@ def eval_gpt_open_ended(model, dataset, args):
               acc+=1
                 
             reference = str(dataset.answers[item])
-            candidate = out_text.split()
+            candidate = out_text
 
             chencherry = SmoothingFunction()
             bleu_1 = sentence_bleu([reference.split()], candidate.split(), weights=(1, 0, 0, 0), smoothing_function=chencherry.method7)
