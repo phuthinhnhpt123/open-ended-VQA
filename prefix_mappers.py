@@ -1,8 +1,7 @@
 # source: https://github.com/rmokady/CLIP_prefix_caption
 import torch
 import torch.nn as nn
-from torch.nn import functional as nnf
-from typing import Tuple, Optional, Union
+from typing import Tuple
 class MLP(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

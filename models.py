@@ -1,15 +1,5 @@
-import numpy as np
-from tqdm import tqdm
-import sys
-import os
-import pdb
-
 from peft import LoraConfig, get_peft_model,TaskType 
-
-import torch
 import torch.nn as nn
-
-import transformers
 from transformers import GPT2Tokenizer
 from transformers import AutoModelForCausalLM
 
@@ -61,4 +51,4 @@ class VQAModel(nn.Module):
                     (self.gpt_embedding_size * prefix_length) // 2,
                     self.gpt_embedding_size * prefix_length))
         else:
-            raise ValueError("select valid mapping type: MLP or Transformer")
+            raise ValueError("invalid mapping type")

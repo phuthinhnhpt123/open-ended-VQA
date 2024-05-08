@@ -1,7 +1,5 @@
 import torch
-import skimage.io as io
-import skimage.transform as transform
-import torchvision
+
 import clip
 from PIL import Image
 import pickle

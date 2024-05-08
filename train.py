@@ -1,21 +1,11 @@
 import torch
 from tqdm import tqdm
-import copy
 import os
-import numpy as np
 import time
-import random
-import torch.nn as nn
 import torch.nn.functional as nnf
 
-import pandas as pd
-
-from transformers import (
-    AdamW,
-    get_linear_schedule_with_warmup,
-)
+from transformers import get_linear_schedule_with_warmup
 from accelerate import Accelerator
-import pdb
 
 
 def pytorch_model_run(train_loader, valid_loader, model_obj, args):
@@ -28,7 +18,7 @@ def pytorch_model_run(train_loader, valid_loader, model_obj, args):
 
     model = model_obj.to(device)
 
-    optimizer = AdamW(model.parameters(), lr=args.lr)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
 
     scheduler = get_linear_schedule_with_warmup(
         optimizer,

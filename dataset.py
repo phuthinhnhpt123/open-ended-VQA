@@ -1,14 +1,8 @@
-from tqdm import tqdm
 import sys
 import torch
-import torch.nn as nn
 from transformers import AutoTokenizer
-import os
-import pandas as pd
-
 import pickle
-import numpy as np
-import pdb
+
 
 class VqaDataset(torch.utils.data.Dataset):
     def __init__(self, path, split='train',like_test=False,prefix_length=2,model_type='gpt2'):
@@ -27,8 +21,7 @@ class VqaDataset(torch.utils.data.Dataset):
         self.answers = data['answers']
         self.img_paths = data['img_paths']
 
-        self.max_seqs_len = data['max_seqs_len']
-        # self.labels = data['class_ids']       
+        self.max_seqs_len = data['max_seqs_len']     
         self.train_setting = True if (split!='test'and like_test==False) else False
         self.prefix_len = prefix_length
 
