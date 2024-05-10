@@ -15,7 +15,7 @@ class VQAModel(nn.Module):
             # insert the visual prefix after the question 
             embedding[b,q_len[b]:q_len[b]+self.prefix_length,:] = prefix_projections[b]  
         return self.gpt(inputs_embeds=embedding, attention_mask=mask)
-    def generate(self, prefix, tokens, mask, q_len):
+    def generate(self, prefix, tokens,_, q_len):
         prefix_projections = self.clip_project(prefix.view(1, -1)).view(self.prefix_length, self.gpt_embedding_size)
 
         embedding_txt = self.gpt.transformer.wte(tokens)
@@ -25,9 +25,7 @@ class VQAModel(nn.Module):
     def __init__(
         self,
         prefix_length=2,
-        clip_length=2,
         prefix_size=512,
-        num_layers=8,
         setting="lora",
         mapping_type="MLP",
         args=None,

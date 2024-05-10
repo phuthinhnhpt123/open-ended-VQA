@@ -53,11 +53,9 @@ def pytorch_model_run(train_loader, valid_loader, model_obj, args):
                     logits = outputs.logits
                     loss = 0.
 
-                    shift = 10 if args.setting=="p_tuning" or args.setting=="prompttuning" else 0 
-
                     for b in range(logits.size(0)):
                         condensed_tokens = tokens[b,q_len[b]+model.prefix_length+1:]
-                        condensed_logits = logits[b,shift+q_len[b]+model.prefix_length:-1]
+                        condensed_logits = logits[b,q_len[b]+model.prefix_length:-1]
 
                         loss+= nnf.cross_entropy(condensed_logits.reshape(-1,logits.shape[-1]), condensed_tokens.flatten(), ignore_index=0)
                     loss=loss/logits.size(0)    
@@ -87,10 +85,9 @@ def pytorch_model_run(train_loader, valid_loader, model_obj, args):
                     outputs = model(prefix, tokens, mask, q_len, batch_size=args.batch_size)
                     logits = outputs.logits
                     loss = 0.
-                    shift = 10 if args.setting=="p_tuning" or args.setting=="prompttuning" else 0 
                     for b in range(logits.size(0)):
                         condensed_tokens = tokens[b,q_len[b]+model.prefix_length+1:]
-                        condensed_logits = logits[b,shift+q_len[b]+model.prefix_length:-1]
+                        condensed_logits = logits[b,q_len[b]+model.prefix_length:-1]
                         loss+= nnf.cross_entropy(condensed_logits.reshape(-1,logits.shape[-1]), condensed_tokens.flatten(), ignore_index=0)
                     loss=loss/logits.size(0)    
                     total_loss += loss.item()
