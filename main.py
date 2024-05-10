@@ -53,7 +53,6 @@ if __name__ == "__main__":
 
     model = VQAModel(
         prefix_length=args.prefix_length,
-        clip_length=4,
         setting=args.setting,
         mapping_type=args.mapping_type,
         args=args,
