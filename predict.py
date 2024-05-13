@@ -6,7 +6,7 @@ from utils import generate_beam
 from nltk.translate.bleu_score import sentence_bleu
 from nltk.translate.bleu_score import SmoothingFunction
 
-from evaluate import load
+from eval import load
 from torch.cuda.amp import autocast
 
     

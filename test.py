@@ -129,19 +129,20 @@ def make_padding(max_len, tokens, question=False,leftover_tokens=0):
             mask = torch.zeros(max_len+ leftover_tokens)
     return tokens, mask, leftover_tokens
 
-with open('visual7w_data/train.pkl','rb') as f:
-    data = pickle.load(f)
+# with open('visual7w_data/train.pkl','rb') as f:
+#     data = pickle.load(f)
 
-tokenizer = AutoTokenizer.from_pretrained('gpt2')
+# tokenizer = AutoTokenizer.from_pretrained('gpt2')
 
-for i in range(3):
-    question = data['questions'][i]
-    answer = data['answers'][i]
+# for i in range(3):
+#     question = data['questions'][i]
+#     answer = data['answers'][i]
 
-    print('question: ', question)
-    print('answer: ', answer)
+#     print('question: ', question)
+#     print('answer: ', answer)
 
-    sentence_tokens,sentence_mask, q_len = pad_sequences(tokenizer,question,answer)
+#     sentence_tokens,sentence_mask, q_len = pad_sequences(tokenizer,question,answer)
 
-    print('sentences tokens: ', sentence_tokens)
-    print('q len: ', q_len)
+#     print('sentences tokens: ', sentence_tokens)
+#     print('q len: ', q_len)
+
