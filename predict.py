@@ -21,6 +21,8 @@ def eval_gpt_open_ended(model, dataset, args):
     acc = 0.
 
     generated_answers = []
+    bleu_scores = []
+    bert_scores = []
 
     metrics = {"bleu":0.0, "Bertscore":0.0, "accuracy":0.0}
 
@@ -49,9 +51,11 @@ def eval_gpt_open_ended(model, dataset, args):
 
             # chencherry = SmoothingFunction()
             bleu_1 = sentence_bleu([reference.split()], candidate.split(), weights=(1, 0, 0, 0))
+            bleu_scores.append(bleu_1)
             bleu_avg+=bleu_1
 
             a = bert_score.compute(references =[reference],predictions =[candidate],model_type = 'bert-base-uncased')
+            bert_scores.append(a['f1'][0])
             bert_avg+= a['f1'][0]
 
     print('------------')
@@ -66,7 +70,7 @@ def eval_gpt_open_ended(model, dataset, args):
     with open('metrics.json', 'w') as f:
       json.dump(metrics,f,indent=4)
 
-    compare_answer = {"predict": generated_answers,"answers": dataset.answers}
+    compare_answer = {"predict": generated_answers,"answers": dataset.answers, "bleu_scores": bleu_scores, "bert_scores": bert_scores}
     df = pd.DataFrame(data=compare_answer)
     df.to_csv('compare_answers.csv',index=False)
 
