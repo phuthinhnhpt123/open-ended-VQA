@@ -12,21 +12,12 @@ def metrics_eval(df):
     bert_avg = 0.
     acc = 0.
 
-    bert_score = load("bertscore")
-
     for i in range(len(df['answers'])):
         if df['predict'][i].lower()==df['answers'][i].lower(): 
             acc+=1
 
-        reference = str(df['answers'][i])
-        candidate = df['predict'][i]
-
-        # chencherry = SmoothingFunction()
-        bleu_1 = sentence_bleu([reference.split()], candidate.split(), weights=(1, 0, 0, 0))
-        bleu_avg+=bleu_1
-
-        a = bert_score.compute(references =[reference],predictions =[candidate],model_type = 'bert-base-uncased')
-        bert_avg+= a['f1'][0]
+        bleu_avg+=float(df['bleu_scores'][i])
+        bert_avg+=float(df['bert_scores'][i])
 
     return round(bleu_avg/len(df['answers']),3), round(bert_avg/len(df['answers']),3), round(acc/len(df['answers']),3)
 
@@ -42,9 +33,9 @@ def evaluate_result(result_dir):
 
         metrics[type] = [bleu, bert, acc]
 
-        print(f'{type}', metrics[type])
+        print(f'{type}: - number of questions: {len(sub_df)} -', metrics[type])
     
-    with open('metrics_augment.json', 'w') as f:
+    with open('metrics_each_types.json', 'w') as f:
       json.dump(metrics,f,indent=4)
 
-evaluate_result('visual7w_data/compare_answers_augment.csv')
+evaluate_result('visual7w_data/compare_answers.csv')
