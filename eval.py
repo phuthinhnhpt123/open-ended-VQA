@@ -30,7 +30,7 @@ def metrics_eval(df):
 
     return round(bleu_avg/len(df['answers']),3), round(bert_avg/len(df['answers']),3), round(acc/len(df['answers']),3)
 
-def evaluate(result_dir):
+def evaluate_result(result_dir):
     df = pd.read_csv(result_dir)
 
     metrics = {}
@@ -47,4 +47,4 @@ def evaluate(result_dir):
     with open('metrics_augment.json', 'w') as f:
       json.dump(metrics,f,indent=4)
 
-evaluate('visual7w_data/compare_answers_augment.csv')
+evaluate_result('visual7w_data/compare_answers_augment.csv')
