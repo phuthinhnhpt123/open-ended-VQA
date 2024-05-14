@@ -5,7 +5,7 @@ import pandas as pd
 
 from nltk.translate.bleu_score import sentence_bleu
 from nltk.translate.bleu_score import SmoothingFunction
-from eval import load
+from evaluate import load
 
 def metrics_eval(df):
     bleu_avg=0.

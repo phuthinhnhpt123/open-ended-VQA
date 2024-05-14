@@ -129,8 +129,25 @@ def make_padding(max_len, tokens, question=False,leftover_tokens=0):
             mask = torch.zeros(max_len+ leftover_tokens)
     return tokens, mask, leftover_tokens
 
+# import shutil
+
 # with open('visual7w_data/train.pkl','rb') as f:
-#     data = pickle.load(f)
+#     data_train = pickle.load(f)
+# with open('visual7w_data/test.pkl','rb') as f:
+#     data_test = pickle.load(f)
+# with open('visual7w_data/val.pkl','rb') as f:
+#     data_val = pickle.load(f)
+
+# img_paths = data_train['img_paths'] + data_test['img_paths'] + data_val['img_paths']
+# img_paths_unique = set(img_paths)
+
+# src_img = 'visual7w_data/images'
+# destination_img = 'visual7w_data/images_use'
+
+# for img in img_paths_unique:
+#     path = os.path.join(src_img,img)
+
+#     shutil.copy(path,destination_img)
 
 # tokenizer = AutoTokenizer.from_pretrained('gpt2')
 

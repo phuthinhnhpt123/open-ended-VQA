@@ -3,6 +3,7 @@ import pandas as pd
 import clip
 from PIL import Image
 import pickle
+import json
 import os
 from tqdm import tqdm
 import numpy as np
@@ -256,4 +257,3 @@ def preprocess_augment_data(data_dir, augment_data_dir, out_path):
     with open(out_path, 'wb') as f:
         pickle.dump(image_dict,f)
     print('Done')
-
