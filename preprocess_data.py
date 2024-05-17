@@ -134,7 +134,7 @@ def preprocess_data(data_dir, data, split, out_path):
 
 def update_classes(pkl_train, pkl_val, pkl_test):
     # standardize answer ids across datasets and compute the maximum number of generated output tokens based on the train set
-    tokenizer = AutoTokenizer.from_pretrained('gpt2-xl')
+    tokenizer = AutoTokenizer.from_pretrained('gpt2')
     with open(pkl_train, 'rb') as f:
         data_train = pickle.load(f)
     with open(pkl_val, 'rb') as f:
@@ -181,7 +181,7 @@ def preprocess_augment_data(data_dir, augment_data_dir, out_path):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device {device}")
 
-    tokenizer = AutoTokenizer.from_pretrained('gpt2-xl')
+    tokenizer = AutoTokenizer.from_pretrained('gpt2')
     clip_model, preprocess = clip.load("ViT-B/32", device=device, jit=False)
 
     with open(data_dir+'/train.pkl','rb') as f:

@@ -35,7 +35,7 @@ def evaluate_result(result_dir):
 
         print(f'{type}: - number of questions: {len(sub_df)} -', metrics[type])
     
-    with open('metrics_each_types.json', 'w') as f:
+    with open('metrics_each_types_augment.json', 'w') as f:
       json.dump(metrics,f,indent=4)
 
-evaluate_result('visual7w_data/compare_answers.csv')
+evaluate_result('visual7w_data/compare_answers_augment.csv')

@@ -40,6 +40,7 @@ class VQAModel(nn.Module):
 
         peft_config = LoraConfig(task_type=TaskType.CAUSAL_LM, inference_mode=False, r=8, lora_alpha=32, lora_dropout=0.1)
         self.gpt = get_peft_model(self.gpt,peft_config)
+        self.gpt.print_trainable_parameters()
 
         self.tokenizer = GPT2Tokenizer.from_pretrained(gpttype)
         self.gpt_embedding_size = self.gpt.transformer.wte.weight.shape[1]
