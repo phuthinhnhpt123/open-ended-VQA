@@ -46,7 +46,7 @@ if __name__ == "__main__":
     args = parse_argument()
     suffix = f"v5_prefixlength_{args.prefix_length}_seed_{args.seed}_gpttype_{args.model_type.replace('/','')}_setting_{args.setting}"
 
-    args.out_dir = os.path.join('../checkpoints', suffix)
+    # args.out_dir = os.path.join('../checkpoints', suffix)
     train_dataset = VqaDataset(args.dataset_path+'/',split="train",prefix_length=args.prefix_length,model_type=args.model_type)
     val_dataset = VqaDataset(args.dataset_path+'/',split="val",prefix_length=args.prefix_length,model_type=args.model_type)
     test_dataset = VqaDataset(args.dataset_path+'/',split="test",prefix_length=args.prefix_length,model_type=args.model_type,like_test=True)
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     if not args.eval:
         model = pytorch_model_run(train_dataloader, val_dataloader, model, args)
     else:
-        checkpoint = os.path.join(args.out_dir, f"open_ended_latest.pt")
+        checkpoint = os.path.join(args.out_dir, 'checkpoints', suffix, f"open_ended_latest.pt")
         if args.verbose:
             print(f">> Loading pre-trained model {checkpoint}!")
         if os.path.exists(checkpoint):
