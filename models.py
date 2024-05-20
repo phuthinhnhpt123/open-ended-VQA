@@ -23,7 +23,7 @@ class VQAModel(nn.Module):
         embedding_txt[q_len:q_len+self.prefix_length,:] = prefix_projections
         return embedding_txt
     
-    def gen_answer(self, prefix, tokens, q_len):
+    def gen_answer(self, prefix, tokens, q_len,max_len):
         prefix_projections = self.clip_project(prefix.view(1, -1)).view(self.prefix_length, self.gpt_embedding_size)
 
         embedding_txt = self.gpt.transformer.wte(tokens)
@@ -38,6 +38,7 @@ class VQAModel(nn.Module):
         outputs = self.gpt.generate(
             inputs_embeds=inputs_embeds,
             num_beams=5,
+            max_new_tokens=max_len,
             num_return_sequences=1,
             no_repeat_ngram_size=1,
             remove_invalid_values=True,
@@ -57,14 +58,16 @@ class VQAModel(nn.Module):
         self.gpttype = gpttype
         self.setting = setting
         self.prefix_length = prefix_length
+        self.tokenizer = GPT2Tokenizer.from_pretrained(gpttype)
         self.gpt = AutoModelForCausalLM.from_pretrained(gpttype,load_in_8bit=True,device_map='auto')
+        self.gpt.generation_config.pad_token_id = self.tokenizer.encode(self.tokenizer.pad_token)[0]
         # load the relevant fine-tuning strategy 
 
         peft_config = LoraConfig(task_type=TaskType.CAUSAL_LM, inference_mode=False, r=8, lora_alpha=32, lora_dropout=0.1)
         self.gpt = get_peft_model(self.gpt,peft_config)
         self.gpt.print_trainable_parameters()
 
-        self.tokenizer = GPT2Tokenizer.from_pretrained(gpttype)
+        
         self.gpt_embedding_size = self.gpt.transformer.wte.weight.shape[1]
         if mapping_type == "MLP":
             self.clip_project = MLP((
