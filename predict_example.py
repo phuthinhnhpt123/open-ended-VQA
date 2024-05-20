@@ -68,5 +68,3 @@ def eval_vqa_open_ended(model, dataset):
     # metrics['accuracy'] = round(acc/len(dataset),3)
 
     # compare_answer = {"predict": generated_answers,"answers": dataset.answers, "bleu_scores": bleu_scores, "bert_scores": bert_scores}
-
-    # return generated_answers

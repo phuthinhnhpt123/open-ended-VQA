@@ -1,6 +1,7 @@
 from train import pytorch_model_run
 import torch
 from predict import eval_gpt_open_ended
+from predict_example import eval_vqa_open_ended
 from models import VQAModel
 from dataset import VqaDataset
 from torch.utils.data import DataLoader
@@ -74,5 +75,6 @@ if __name__ == "__main__":
             )
         else:
             raise ValueError("Please provide valid path for loading checkpoint")
-        eval_gpt_open_ended(model,test_dataset,args)
+        # eval_gpt_open_ended(model,test_dataset,args)
+        eval_vqa_open_ended(model, test_dataset)
 
