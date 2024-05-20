@@ -30,8 +30,10 @@ class VQAModel(nn.Module):
         
         embedding_txt[q_len:q_len+self.prefix_length,:] = prefix_projections
 
+        inputs_embeds = embedding_txt.unsqueeze(0)
+
         outputs = self.gpt.generate(
-            embedding_txt,
+            inputs_embeds,
             num_beams=5,
             num_return_sequences=1,
             no_repeat_ngram_size=1,
