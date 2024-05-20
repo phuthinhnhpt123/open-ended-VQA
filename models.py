@@ -32,6 +32,9 @@ class VQAModel(nn.Module):
 
         inputs_embeds = embedding_txt.unsqueeze(0)
 
+        print('input_embed: ',inputs_embeds)
+        print('input_embed shape: ',inputs_embeds.shape)
+
         outputs = self.gpt.generate(
             inputs_embeds,
             num_beams=5,
