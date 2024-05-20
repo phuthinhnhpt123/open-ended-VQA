@@ -31,7 +31,7 @@ class VQAModel(nn.Module):
         embedding_txt[q_len:q_len+self.prefix_length,:] = prefix_projections
 
         outputs = self.gpt.generate(
-            tokens,
+            embedding_txt,
             num_beams=5,
             num_return_sequences=1,
             no_repeat_ngram_size=1,
