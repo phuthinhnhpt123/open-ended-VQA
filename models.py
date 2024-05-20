@@ -22,6 +22,23 @@ class VQAModel(nn.Module):
         
         embedding_txt[q_len:q_len+self.prefix_length,:] = prefix_projections
         return embedding_txt
+    
+    def gen_answer(self, prefix, tokens, q_len):
+        prefix_projections = self.clip_project(prefix.view(1, -1)).view(self.prefix_length, self.gpt_embedding_size)
+
+        embedding_txt = self.gpt.transformer.wte(tokens)
+        
+        embedding_txt[q_len:q_len+self.prefix_length,:] = prefix_projections
+
+        outputs = self.gpt.generate(
+            tokens,
+            num_beams=5,
+            num_return_sequences=1,
+            no_repeat_ngram_size=1,
+            remove_invalid_values=True,
+        )
+
+        return self.tokenizer.decode(outputs[0],skip_special_tokens=True)
     def __init__(
         self,
         prefix_length=2,
