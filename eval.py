@@ -38,4 +38,41 @@ def evaluate_result(result_dir):
     with open('metrics_each_types_augment.json', 'w') as f:
       json.dump(metrics,f,indent=4)
 
-evaluate_result('visual7w_data/compare_answers_augment.csv')
+def eval_bad_result(result_dir):
+    df = pd.read_csv(result_dir)
+
+    bad_result = df[(df['bert_scores'] < 0.5)]
+
+    bad_result = bad_result[(bad_result['types'] == 'why') | (bad_result['types'] == 'when')].reset_index(drop=True)
+
+    pairs = []
+    for i in range(len(bad_result)):
+        sentence=''
+        sentence = sentence + 'q: ' + bad_result['questions'][i] + '. a: ' + bad_result['answers'][i]
+        pairs.append(sentence)
+    
+    bad_result['q_a'] = pairs
+
+    bad_result.to_csv('bad_results.csv',index=False) 
+
+def filter_question(result_dir):
+    df = pd.read_csv(result_dir)
+
+    df = df[df['questions'].str.contains('how many', case=False, na=False)]
+
+    df.to_csv('howmany_questions.csv',index=False)
+
+def sample_augment(result_dir):
+    df = pd.read_csv(result_dir)
+
+    words = ['one','1','0','none','zero']
+    regex_pattern = '|'.join(words)
+    
+    df = df[(~df['answers'].str.contains(regex_pattern, case=False, na=False))].reset_index(drop=True)
+
+    df.to_csv('how_many_questions.csv',index=False)
+
+# evaluate_result('visual7w_data/data_gpt2/compare_answers_augment.csv')
+# eval_bad_result('visual7w_data/data_gpt2/compare_answers.csv')
+sample_augment('howmany_questions.csv')
+# filter_question('visual7w_data/data_gpt2/train.csv')

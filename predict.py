@@ -12,7 +12,9 @@ from torch.cuda.amp import autocast
     
 def eval_gpt_open_ended(model, dataset, args):
     model.eval()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+    model = model.to(device)
     bert_score = load("bertscore")
 
     bleu_avg=0.
@@ -31,9 +33,9 @@ def eval_gpt_open_ended(model, dataset, args):
         for item in range(len(dataset)):
             prefix, tokens, mask, q_len = dataset[item]
 
-            prefix = prefix.type(torch.float32)
-            tokens = tokens.type(torch.long)
-            mask = mask.type(torch.long)
+            prefix = prefix.to(device, dtype=torch.float32)
+            tokens = tokens.to(device,dtype=torch.long)
+            mask = mask.to(device,dtype=torch.long)
 
             with autocast(dtype=torch.float16):
               with torch.no_grad():
@@ -54,7 +56,7 @@ def eval_gpt_open_ended(model, dataset, args):
             bleu_scores.append(bleu_1)
             bleu_avg+=bleu_1
 
-            a = bert_score.compute(references =[reference],predictions =[candidate],model_type = 'bert-base-uncased')
+            a = bert_score.compute(references =[reference],predictions =[candidate],model_type = 'microsoft/deberta-large-mnli')
             bert_scores.append(a['f1'][0])
             bert_avg+= a['f1'][0]
 
