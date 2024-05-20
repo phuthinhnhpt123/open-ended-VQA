@@ -60,6 +60,8 @@ class VQAModel(nn.Module):
         self.prefix_length = prefix_length
         self.tokenizer = GPT2Tokenizer.from_pretrained(gpttype)
         self.gpt = AutoModelForCausalLM.from_pretrained(gpttype,load_in_8bit=True,device_map='auto')
+
+        self.tokenizer.pad_token = self.tokenizer.eos_token
         self.gpt.generation_config.pad_token_id = self.tokenizer.encode(self.tokenizer.pad_token)[0]
         # load the relevant fine-tuning strategy 
 
