@@ -66,7 +66,7 @@ if __name__ == "__main__":
     if not args.eval:
         model = pytorch_model_run(train_dataloader, val_dataloader, model, args)
     else:
-        checkpoint = os.path.join(args.out_dir, suffix, f"open_ended_latest.pt")
+        checkpoint = os.path.join(args.out_dir, f"open_ended_latest.pt")
         if args.verbose:
             print(f">> Loading pre-trained model {checkpoint}!")
         if os.path.exists(checkpoint):
