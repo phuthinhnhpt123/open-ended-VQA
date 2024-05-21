@@ -38,9 +38,9 @@ def eval_vqa_open_ended(model, dataset):
 
         with autocast(dtype=torch.float16):
           with torch.no_grad():
-              # embed = model.generate(prefix,tokens,mask,q_len).view(1,tokens.size(0),-1)
+              embed = model.generate(prefix,tokens,mask,q_len).view(1,tokens.size(0),-1)
 
-              out_text = model.gen_answer(prefix,tokens,q_len,max_len)
+              out_text = generate_beam(model, model.tokenizer,generated=embed,entry_length=max_len, temperature=1)[0]
               generated_answers.append(out_text)
               print(f'item {item}: ', out_text)
 
