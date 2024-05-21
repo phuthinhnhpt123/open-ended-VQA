@@ -75,6 +75,6 @@ if __name__ == "__main__":
             )
         else:
             raise ValueError("Please provide valid path for loading checkpoint")
-        # eval_gpt_open_ended(model,test_dataset,args)
-        eval_vqa_open_ended(model, test_dataset)
+        eval_gpt_open_ended(model,test_dataset,args)
+        # eval_vqa_open_ended(model, test_dataset)
 
