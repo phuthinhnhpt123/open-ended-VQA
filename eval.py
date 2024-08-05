@@ -35,44 +35,57 @@ def evaluate_result(result_dir):
 
         print(f'{type}: - number of questions: {len(sub_df)} -', metrics[type])
     
-    with open('metrics_each_types_augment.json', 'w') as f:
+    with open('metrics_each_types.json', 'w') as f:
       json.dump(metrics,f,indent=4)
 
 def eval_bad_result(result_dir):
     df = pd.read_csv(result_dir)
 
-    bad_result = df[(df['bert_scores'] < 0.5)]
+    for type in ['what', 'where', 'when', 'why', 'who', 'how']:
+        sub_df = df[df['types'] == type].reset_index(drop=True)
 
-    bad_result = bad_result[(bad_result['types'] == 'why') | (bad_result['types'] == 'when')].reset_index(drop=True)
+        # bad_result = sub_df[sub_df['bert_scores'] < 0.5]
 
-    pairs = []
-    for i in range(len(bad_result)):
-        sentence=''
-        sentence = sentence + 'q: ' + bad_result['questions'][i] + '. a: ' + bad_result['answers'][i]
-        pairs.append(sentence)
-    
-    bad_result['q_a'] = pairs
+        print(f'{type}: - number of questions: {len(sub_df)}')
 
-    bad_result.to_csv('bad_results.csv',index=False) 
+    # bad_result = df[(df['bert_scores'] < 0.5)]
 
-def filter_question(result_dir):
+    # bad_result = bad_result[(bad_result['types'] == 'what')].reset_index(drop=True)
+
+    # bad_result.to_csv('bad_results_what.csv',index=False) 
+
+def filter_question(result_dir,destination_dir):
     df = pd.read_csv(result_dir)
+    des_df = pd.read_csv(destination_dir)
 
-    df = df[df['questions'].str.contains('how many', case=False, na=False)]
+    check_question = list(des_df['questions'])
+    check_answer = list(des_df['answers'])
 
-    df.to_csv('howmany_questions.csv',index=False)
+    indices_to_drop = []
+    for i in range(len(df)):
+        if df['questions'][i] in check_question and df['answers'][i] in check_answer:
+            idx = df[(df['questions'] == df['questions'][i]) & (df['answers'] == df['answers'][i])].index
+            indices_to_drop.extend(idx)
+    df.drop(indices_to_drop, inplace=True)
+    df.reset_index(drop=True, inplace=True)
+
+    df.to_csv('what_question_samples.csv',index=False)
 
 def sample_augment(result_dir):
     df = pd.read_csv(result_dir)
 
-    words = ['one','1','0','none','zero']
-    regex_pattern = '|'.join(words)
+    # words = ['one','1','0','none','zero']
+    # regex_pattern = '|'.join(words)
     
-    df = df[(~df['answers'].str.contains(regex_pattern, case=False, na=False))].reset_index(drop=True)
+    # df = df[(~df['answers'].str.contains(regex_pattern, case=False, na=False))].reset_index(drop=True)
+    df = df[df['types'] == 'what']
 
-    df.to_csv('how_many_questions.csv',index=False)
+    sub_df = df.sample(n=238, random_state=1)
 
-# evaluate_result('visual7w_data/data_gpt2/compare_answers_augment.csv')
-# eval_bad_result('visual7w_data/data_gpt2/compare_answers.csv')
-sample_augment('howmany_questions.csv')
-# filter_question('visual7w_data/data_gpt2/train.csv')
+    print(len(sub_df['answers'].unique()))
+    sub_df.to_csv('what_question_samples.csv',index=False)
+
+evaluate_result('visual7w_data/data_gpt2/evaluation/compare_answers(3).csv')
+# eval_bad_result('augment.csv')
+# sample_augment('visual7w_data/data_gpt2/dataset/train/train.csv')
+# filter_question('what_question_samples.csv','augment.csv')
