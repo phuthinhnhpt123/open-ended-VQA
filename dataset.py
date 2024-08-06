@@ -21,7 +21,7 @@ class VqaDataset(torch.utils.data.Dataset):
         self.answers = data['answers']
         self.img_paths = data['img_paths']
 
-        self.max_seqs_len = data['max_seqs_len']     
+        self.max_seq_len = data['max_seq_len']     
         self.train_setting = True if (split!='test'and like_test==False) else False
         self.prefix_len = prefix_length
 
@@ -38,9 +38,9 @@ class VqaDataset(torch.utils.data.Dataset):
             q=torch.tensor(self.tokenizer.encode(self.questions[index]))
             a=torch.tensor(self.tokenizer.encode(str(self.answers[index])))
             
-            q,q_mask,leftover_tokens = self.make_padding(self.max_seqs_len[0],q,question=True)
+            q,q_mask,leftover_tokens = self.make_padding(self.max_seq_len[0],q,question=True)
             q_len = m[0].size(0) + q.size(0) + m[1].size(0)
-            a,a_mask,_ = self.make_padding(self.max_seqs_len[1],a,leftover_tokens=leftover_tokens)
+            a,a_mask,_ = self.make_padding(self.max_seq_len[1],a,leftover_tokens=leftover_tokens)
             if len((a==0).nonzero())!=0:
                 pad_start = (a==0).nonzero()[0]
             else:
@@ -56,7 +56,7 @@ class VqaDataset(torch.utils.data.Dataset):
             # since inference is not performed batch-wised we don't need to apply padding
             q = torch.tensor(self.tokenizer.encode(self.questions[index]))
             
-            q,q_mask,_ = self.make_padding_test_setting(self.max_seqs_len[0],q)
+            q,q_mask,_ = self.make_padding_test_setting(self.max_seq_len[0],q)
             q_len = m[0].size(0) + q.size(0) + m[1].size(0)
             sentence_tokens = torch.cat((m[0],q,m[1],torch.ones(self.prefix_len),m[2]))
             

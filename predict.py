@@ -41,7 +41,7 @@ def eval_gpt_open_ended(model, dataset, args):
               with torch.no_grad():
                   embed = model.generate(prefix,tokens,mask,q_len).view(1,tokens.size(0),-1)
 
-                  out_text = generate_beam(model, model.tokenizer,generated=embed,entry_length=dataset.max_seqs_len[1], temperature=1)[0]
+                  out_text = generate_beam(model, model.tokenizer,generated=embed,entry_length=dataset.max_seq_len[1], temperature=1)[0]
                   generated_answers.append(out_text)
                   print(f'item {item}: ', out_text)
 
